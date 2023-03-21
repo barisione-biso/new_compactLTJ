@@ -1,0 +1,251 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "LOCAL FILTERED Query index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query-index",
+            "args": ["~/dcc_uchile/git_projects/data/wikidata-filtered-enumerated.dat.ring",
+                    "${workspaceFolder}/Queries/Queries-wikidata-benchmark.txt",
+                    "sigmod21",
+                    "0", "1"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "DIJKSTRA FULL Build index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/build-index",
+            "args": ["/data/graphs/wikidata-whole-dump/wikidata.nt.enumerated",
+                    "ring"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "DIJKSTRA FULL query index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query-index",
+            "args": ["/data/fbarisio/wikidata.nt.enumerated.ring",
+                    "Queries/Queries-bgps-limit1000.txt", 
+                    "backward_only", "1", "1", "1000", "600"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "SHANNON FULL Build index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/build-index",
+            "args": ["../data/wikidata.nt.enumerated",
+                    "ring"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "SHANNON FULL query index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query-index",
+            "args": ["../data/wikidata.nt.enumerated",
+                    "Queries/Queries-bgps-limit1000.txt", 
+                    "backward_only", "1", "1", "1000", "600"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "DIJKSTRA FILTERED Build index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/build-index",
+            "args": ["/data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated",
+                    "ring"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "DIJKSTRA FULL Build index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/build-index",
+            "args": ["/data/fbarisio/wikidata-filtered.nt.sorted.enumerated-1000",
+                    "ring"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "DIJKSTRA FILTERED query index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query-index",
+            "args": ["/data/fbarisio/wikidata-filtered.nt.sorted.enumerated_ORIG/wikidata-filtered.nt.sorted.enumerated.ring",
+                    "Queries/Queries-wikidata-benchmark.txt", 
+                    "one_ring_muthu_leap", "1", "1", "1000", "600"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "DIJKSTRA FILTERED SAME ALPHABET SPO query index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query-index",
+            "args": ["/data/fbarisio/wikidata-filtered.nt.sorted.enumerated.ring",
+                    "Queries-wikidata-benchmark.txt", 
+                    "backward_only", "1", "1", "1000", "600"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "LOCAL test_ring_spo",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/test_ring_spo",
+            "args": ["~/dcc_uchile/git_projects/data/wikidata-filtered-enumerated.dat.ring.spo"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "LOCAL test_ring_sop",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/test_ring_sop",
+            "args": ["~/dcc_uchile/git_projects/data/wikidata-filtered-enumerated.dat.ring.sop"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "PYTHON (REMEMBER TO SELECT THE FILE to SET $FILE VAR)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}"
+        }
+    ]
+}

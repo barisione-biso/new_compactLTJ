@@ -1,0 +1,1 @@
+python automated_test.py -i /data/fbarisio/wikidata-filtered.nt.sorted.enumerated_ORIG/wikidata-filtered.nt.sorted.enumerated.ring -q Queries/Queries-wikidata-benchmark.txt --OutputFolder experiment_output

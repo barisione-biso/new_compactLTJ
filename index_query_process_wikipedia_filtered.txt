@@ -1,0 +1,246 @@
+****** Starting automated test.
+('Index file: ', 'wikidata-filtered.nt.sorted.enumerated.ring', ' located at :', '/data/graphs/wikidata')
+('Query file: ', 'Queries-wikidata-benchmark.txt', ' located at :', 'Queries')
+('Output folder: ', 'experiment_output')
+Available modes : sigmod21,sigmod21_adaptive,one_ring_muthu_leap,one_ring_muthu_leap_adaptive,backward_only,backward_only_muthu,backward_only_adaptive,backward_only_adaptive_muthu,backward_only_leap,backward_only_leap_muthu,backward_only_leap_adaptive_muthu
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'sigmod21' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt sigmod21 0 0 1000 600 > experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'sigmod21_adaptive' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt sigmod21_adaptive 0 0 1000 600 > experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'one_ring_muthu_leap' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt one_ring_muthu_leap 0 0 1000 600 > experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'one_ring_muthu_leap_adaptive' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt one_ring_muthu_leap_adaptive 0 0 1000 600 > experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only 0 0 1000 600 > experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only_muthu' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only_muthu 0 0 1000 600 > experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only_adaptive' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only_adaptive 0 0 1000 600 > experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only_adaptive_muthu' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only_adaptive_muthu 0 0 1000 600 > experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only_leap' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only_leap 0 0 1000 600 > experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only_leap_muthu' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only_leap_muthu 0 0 1000 600 > experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Running queries for dataset 'wikidata-filtered.nt.sorted.enumerated.ring' using 'backward_only_leap_adaptive_muthu' mode.
+./build/query-index /data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated.ring Queries/Queries-wikidata-benchmark.txt backward_only_leap_adaptive_muthu 0 0 1000 600 > experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Total # of sigmod21 rows: 850
+Total # of sigmod21_adaptive rows: 850
+Total # of one_ring_muthu_leap rows: 850
+Total # of one_ring_muthu_leap_adaptive rows: 850
+Total # of backward_only rows: 850
+Total # of backward_only_muthu rows: 850
+Total # of backward_only_adaptive rows: 850
+Total # of backward_only_adaptive_muthu rows: 850
+Total # of backward_only_leap rows: 850
+Total # of backward_only_leap_muthu rows: 850
+Total # of backward_only_leap_adaptive_muthu rows: 850
+****** Checking for result correctness.
+('****** Number of different results: ', 0)
+****** Creating type specific files to be use later for plotting.
+Creating plots/matplotlib/J3.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/J4.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/P2.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/P3.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/P4.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/S1.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/S2.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/S3.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/S4.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/T2.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/T3.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/T4.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/TI2.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/TI3.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/TI4.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/Tr1.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Creating plots/matplotlib/Tr2.txt file.
+Processing : experiment_output/tmp_sigmod21_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_sigmod21_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_one_ring_muthu_leap_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+Processing : experiment_output/tmp_backward_only_leap_adaptive_muthu_wikidata-filtered.nt.sorted.enumerated.ring_1000_600.csv
+****** Ending automated test.

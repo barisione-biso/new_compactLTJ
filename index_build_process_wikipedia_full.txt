@@ -1,0 +1,19 @@
+ Building the SPO Index 
+--Indexing 958844165 triples
+-- Index constructed successfully
+  Index built  13293227258 bytes
+Building SPO crc arrays
+ CRC arrays built 16046964983 bytes
+Index saved
+12062 seconds.
+68317646800 bytes.
+ Building the SOP Index 
+--Indexing 958844165 triples
+-- Index constructed successfully
+  Index built  13296789426 bytes
+Building SOP crc arrays
+ CRC arrays built 32089705789 bytes
+Index saved
+11050 seconds.
+68317646800 bytes.
+CRC array saved
