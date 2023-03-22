@@ -25,7 +25,7 @@
 
 #include <triple_pattern.hpp>
 #include <cltj.hpp>
-#include <ltj_iterator.hpp>
+#include <ltj_iterator_manager.hpp>
 #include <gao.hpp>
 #include <vector>
 #include <unordered_map>
@@ -33,7 +33,7 @@
 
 namespace ltj {
 
-    template<class index_scheme_t = index_scheme::compactLTJ, class var_t = uint8_t, class cons_t = uint64_t, class ltj_iterator_t = ltj_iterator<index_scheme_t, var_t,cons_t>>//, class gao = gao_t<>
+    template<class index_scheme_t = index_scheme::compactLTJ, class var_t = uint8_t, class cons_t = uint64_t, class ltj_iterator_t = ltj_iterator_manager<index_scheme_t, var_t,cons_t>>//, class gao = gao_t<>
     class ltj_algorithm {
 
     public:
