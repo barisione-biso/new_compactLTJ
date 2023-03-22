@@ -139,10 +139,7 @@ void query(const std::string &file, const std::string &queries, uint64_t number_
     vector<string> dummy_queries;
     bool result = get_file_content(queries, dummy_queries);
 
-    index_scheme_type graph;
-    
-    //sdsl::load_from_file(graph, file);
-    //std::cout << endl << " Index loaded " << sdsl::size_in_bytes(graph) << " bytes" << endl;
+    index_scheme_type graph(file);
     
     std::ifstream ifs;
     uint64_t nQ = 0;
@@ -198,8 +195,8 @@ void query(const std::string &file, const std::string &queries, uint64_t number_
 int main(int argc, char* argv[])
 {
     typedef index_scheme::compactLTJ index_scheme_type;
-    if(argc != 4){
-        std::cout << "Usage: " << argv[0] << "<index> <queries> <result_limit> <timeout>"<< std::endl;
+    if(argc != 5){
+        std::cout << "Usage: " << argv[0] << " <index> <queries> <result_limit> <timeout>"<< std::endl;
         return 0;
     }
 
