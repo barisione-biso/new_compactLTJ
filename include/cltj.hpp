@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cltj_index.hpp>
-#include "cltj_utils.hpp"
+#include <cltj_utils.hpp>
+#include <cltj_config.hpp>
 
 using namespace std;
 using namespace sdsl;
@@ -30,6 +31,9 @@ namespace index_scheme {
                 }
 
                 std::cout << "Index loaded " << m_index->size() << " bytes" << std::endl;
+            }
+            cltj::CTrie* get_trie(std::string order){
+                return m_index->getTrie(order);
             }
     };
 }

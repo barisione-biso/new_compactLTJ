@@ -169,21 +169,22 @@ namespace ltj {
             for (const rdf::triple_pattern& triple_pattern : *m_ptr_triple_patterns) {
                 var_type var_s, var_p, var_o;
                 bool s = false, p = false, o = false;
-                size_type size = index_scheme::util::get_size_interval<ltj_iter_type>(m_ptr_iterators->at(i));
+                const size_type weight = m_ptr_iterators->at(i).get_child_count();
+                std::cout << "Iter "<< i<<" Calc. Min Weight : " << weight << std::endl;
                 if(triple_pattern.s_is_variable()){
                     s = true;
                     var_s = (var_type) triple_pattern.term_s.value;
-                    var_to_vector(var_s, size,m_hash_table_position, m_var_info);
+                    var_to_vector(var_s, weight,m_hash_table_position, m_var_info);
                 }
                 if(triple_pattern.p_is_variable()){
                     p = true;
                     var_p = (var_type) triple_pattern.term_p.value;
-                    var_to_vector(var_p, size,m_hash_table_position, m_var_info);
+                    var_to_vector(var_p, weight,m_hash_table_position, m_var_info);
                 }
                 if(triple_pattern.o_is_variable()){
                     o = true;
                     var_o = triple_pattern.term_o.value;
-                    var_to_vector(var_o, size,m_hash_table_position, m_var_info);
+                    var_to_vector(var_o, weight,m_hash_table_position, m_var_info);
                 }
                 if(s && p){
                     var_to_related(var_s, var_p, m_hash_table_position, m_var_info);
@@ -214,10 +215,10 @@ namespace ltj {
             m_lonely_variables.reserve(m_var_info.size() - m_lonely_start);
             //std::cout << "Done. " << std::endl;
             i = 0;
-            /*if(index_scheme::util::configuration.is_adaptive()){
+            if(false){// index_scheme::util::configuration.is_adaptive()){
                 m_starting_var = m_var_info[0].name;
                 //m_ptr_index->clear_cache();
-            }else{*/
+            }else{
                 //3. Choosing the variables
                 //std::cout << "Choosing GAO ... " << std::flush;
                 std::vector<bool> checked(m_var_info.size(), false);
@@ -244,8 +245,8 @@ namespace ltj {
                     ++i;
                 }
                 m_starting_var = gao[0];
-            //}
-            //std::cout << "Done. " << std::endl;
+            }
+            std::cout << "Done. " << std::endl;
         }
 
         //! Copy constructor
@@ -319,7 +320,7 @@ namespace ltj {
                                 //const triple_pattern& triple_pattern = *(it->get_triple_pattern());
                                 const ltj_iter_type &iter = *it;
                                 size_type weight = 0;
-                                weight = index_scheme::util::get_size_interval<ltj_iter_type>(iter);
+                                weight = iter.get_child_count();
                                 if(weight < min_weight){
                                     min_weight = weight;
                                 }

@@ -22,6 +22,7 @@
 
 #include <triple_pattern.hpp>
 #include <ltj_iterator.hpp>
+#include <utils.hpp>
 
 #define VERBOSE 0
 
@@ -38,15 +39,17 @@ namespace ltj {
         typedef index_scheme_t index_scheme_type;
         typedef uint64_t size_type;
         typedef ltj_iterator<index_scheme_type, var_type, value_type> ltj_iter_type;
-
+        typedef std::unordered_map<std::string, ltj_iter_type> var_to_iterators_type;
+        typedef std::vector<std::string> orders_type;
     private:
         const rdf::triple_pattern *m_ptr_triple_pattern;
         index_scheme_type *m_ptr_index; //TODO: should be const
         value_type m_cur_s;
         value_type m_cur_o;
         value_type m_cur_p;
-        bool m_is_empty = false;
-        ltj_iter_type m_iter;//TODO: It has to be a vector?.
+        bool m_is_empty = true;
+        var_to_iterators_type m_order_to_iterators;
+        ltj_iter_type m_selected_iter;
         std::string m_last_iter;//TODO: to be removed.
         //Stores the variable that 'owns' the iterator. This means the following:
         //Any variable which set 'm_last_iter' is flagged as owner, which is useful by adaptive algorithms to 'release' or 'unset' the iterator when needed.
@@ -58,9 +61,11 @@ namespace ltj {
             m_cur_p = o.m_cur_p;
             m_cur_o = o.m_cur_o;
             m_is_empty = o.m_is_empty;
-            m_iter = o.m_iter;
+            m_selected_iter = o.m_selected_iter;
+            m_order_to_iterators = o.m_order_to_iterators;
         }
     public:
+        const bool &is_empty = m_is_empty;
 
         bool is_owner_variable_subject() {
             return m_ptr_triple_pattern->term_s.is_variable && m_var_owner == m_ptr_triple_pattern->term_s.value;
@@ -85,8 +90,53 @@ namespace ltj {
         inline bool is_variable_object(var_type var) {
             return m_ptr_triple_pattern->term_o.is_variable && var == m_ptr_triple_pattern->term_o.value;
         }
+        /*
+        a. Obtengo el orden parcial con las constantes (si es que hay).
 
-        const bool &is_empty = m_is_empty;
+                Supongamos que estamos trabajando con el triple ?X1 100 ?X2, entonces:
+                order<<getConstantsOrder(triple...);
+
+                deja order = "1 "
+
+        b. Completamos el orden parcial calculando todas las permutaciones de las variables del triple.
+            ejem:
+            Para el mismo triple de arriba, creamos triple para P S O (1 0 2) y P O S (1 2 0)
+        */
+        const orders_type get_orders(){
+            //a.
+            orders_type all_orders;
+            orders_type variables;
+            std::stringstream constant_order;
+            if(!m_ptr_triple_pattern->term_s.is_variable){
+                constant_order<<"0 ";
+            }else{
+                variables.emplace_back("0");
+            }
+            if(!m_ptr_triple_pattern->term_p.is_variable){
+                constant_order<<"1 ";
+            }else{
+                variables.emplace_back("1");
+            }
+            if(!m_ptr_triple_pattern->term_o.is_variable){
+                constant_order<<"2 ";
+            }else{
+                variables.emplace_back("2");
+            }
+            //b.
+            //Prerequisite to use next_permutation.
+            std::sort(variables.begin(), variables.end());
+            do{
+                std::stringstream aux;
+                aux << constant_order.str();
+                for(const auto variable : variables){
+                    aux << variable << " ";
+                }
+                std::string str = aux.str();
+                index_scheme::util::rtrim(str);
+                all_orders.emplace_back(str);
+            }while(std::next_permutation(variables.begin(),variables.end()));
+            return all_orders;
+        }
 
         ltj_iterator_manager() = default;
 
@@ -94,19 +144,11 @@ namespace ltj {
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
 
-            m_iter = ltj_iter_type(triple, m_ptr_index);
-            if(m_iter.is_empty){
-                m_is_empty = true;
-                return;
-            }
-            //Currently all the members below are used exclusively to precalculate gao and to do so we use SPO index values.
-            //>>
-            m_cur_s = m_iter.cur_s;
-            m_cur_p = m_iter.cur_p;
-            m_cur_o = m_iter.cur_o;
-            if(m_iter.is_empty){
-                m_is_empty = true;
-                return;
+            for(const auto& order : get_orders()){
+                m_order_to_iterators[order] = ltj_iter_type(triple, m_ptr_index, order);
+                if(!m_order_to_iterators[order].is_empty){
+                    m_is_empty = false;
+                }
             }
         }
         const rdf::triple_pattern* get_triple_pattern() const{
@@ -139,7 +181,8 @@ namespace ltj {
                 m_is_empty = o.m_is_empty;
                 m_ptr_triple_pattern = std::move(o.m_ptr_triple_pattern);
                 m_ptr_index = std::move(o.m_ptr_index);
-                m_iter = std::move(o.m_iter);
+                m_selected_iter = std::move(o.m_selected_iter);
+                m_order_to_iterators = std::move(o.m_order_to_iterators);
             }
             return *this;
         }
@@ -154,7 +197,8 @@ namespace ltj {
             std::swap(m_cur_p, o.m_cur_p);
             std::swap(m_cur_o, o.m_cur_o);
             std::swap(m_is_empty, o.m_is_empty);
-            std::swap(m_iter, o.m_iter);
+            std::swap(m_selected_iter, o.m_selected_iter);
+            std::swap(m_order_to_iterators, o.m_order_to_iterators);
         }
         /*Unset the variable iterator ownership. Only used by adaptive algorithms.*/
         //TODO: not needed.
@@ -210,15 +254,15 @@ namespace ltj {
                     return;
                 } else if (m_cur_o != -1UL) {
                     //OS->P
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                     //m_last_iter = "SOP";
                 } else if (m_cur_p != -1UL) {
                     //PS->O
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                     //m_last_iter = "SPO";
                 } else {
                     //S->{OP,PO}
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                 }
                 m_cur_s = c;
             } else if (is_variable_predicate(var)) {
@@ -226,15 +270,15 @@ namespace ltj {
                     return;
                 } else if (m_cur_o != -1UL) {
                     //OP->S
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                     //m_last_iter = "SPO";
                 } else if (m_cur_s != -1UL) {
                     //SP->O
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                     //m_last_iter = "SOP";
                 } else {
                     //P->{OS,SO} same range in POS and PSO
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                 }
                 m_cur_p = c;
             } else if (is_variable_object(var)) {
@@ -243,15 +287,15 @@ namespace ltj {
                 }
                 if (m_cur_p != -1UL) {
                     //PO->S
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                     //m_last_iter = "SOP";
                 } else if (m_cur_s != -1UL) {
                     //SO->P
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                     //m_last_iter = "SPO";
                 } else {
                     //O->{PS,SP} same range in OPS and OSP
-                    m_iter.down(var,c);
+                    m_selected_iter.down(var,c);
                 }
                 m_cur_o = c;
             }
@@ -262,30 +306,30 @@ namespace ltj {
             //spo_iter.up(var);
             if (is_variable_subject(var)) {
                 if (m_cur_o != -1UL && m_cur_p != -1UL){ //leaf of virtual trie.
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 } else if (m_cur_o != -1UL || m_cur_p != -1UL) {//second level nodes.
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 } else {//first level nodes. //TODO: I think this code is unused cause we can't go up one level if we are in the first one.
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 }
                 m_cur_s = -1UL;
             } else if (is_variable_predicate(var)) {
                 if (m_cur_s != -1UL && m_cur_o != -1UL){
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 } else if (m_cur_o != -1UL || m_cur_s != -1UL) {
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 } else {
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 }
                 m_cur_p = -1UL;
             } else if (is_variable_object(var)) {
                 if (m_cur_s != -1UL && m_cur_p != -1UL){
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 }
                 if (m_cur_p != -1UL || m_cur_s != -1UL) {
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 } else {
-                    m_iter.up(var);
+                    m_selected_iter.up(var);
                 }
                 m_cur_o = -1UL;
             }
@@ -293,19 +337,28 @@ namespace ltj {
 
         bool in_last_level(){
             bool r = false;
-            r = m_iter.in_last_level();
+            r = m_selected_iter.in_last_level();
             return r;
         }
 
         //Solo funciona en último nivel, en otro caso habría que reajustar
         std::vector<uint64_t> seek_all(var_type var){
-            return m_iter.seek_all(var);
+            return m_selected_iter.seek_all(var);
         }
-        value_type leap(var_type var) {
-            return m_iter.leap(var);
+        value_type leap(size_type c) {
+            return m_selected_iter.leap(c);
         }
-        value_type leap(var_type var, size_type c) {
-            return m_iter.leap(var,c);
+
+        const size_type get_child_count() const{
+            size_type min_weight = -1;//TODO: Only works with unsigned numbers.
+            std::unordered_map<size_type, size_type> var_to_weight;
+            for(auto iter : m_order_to_iterators){
+                const auto& weight = iter.second.get_child_count();
+                if (weight < min_weight){
+                    min_weight = weight;
+                }
+            }
+            return min_weight;
         }
     };
 }

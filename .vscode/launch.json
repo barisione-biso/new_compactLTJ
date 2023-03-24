@@ -8,7 +8,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/query-index",
-            "args": ["/data/graphs/wikidata/wikidata-filtered.nt.sorted.enumerated-/", 
+            "args": ["/home/fabrizio/dcc_uchile/git_projects/data/wikidata_cltj/",
                     "Queries/Queries-wikidata-benchmark.txt", "1000", "600"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

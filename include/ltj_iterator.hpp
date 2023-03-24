@@ -20,14 +20,15 @@
 #ifndef LTJ_ITERATOR_HPP
 #define LTJ_ITERATOR_HPP
 
-#include<triple_pattern.hpp>
-#include<vector>
+#include <triple_pattern.hpp>
+#include <cltj_config.hpp>
+#include <vector>
 #define VERBOSE 0
 
 namespace ltj {
 
     template<class index_scheme_t, class var_t, class cons_t>
-    class ltj_iterator {
+    class ltj_iterator {//TODO: if CLTJ is eventually integrated with the ring to form a Compact Index Schemes project then this class has to be renamed to CLTJ_iterator, for instance.
 
     public:
         typedef cons_t value_type;
@@ -44,7 +45,17 @@ namespace ltj {
         value_type m_cur_p;
         value_type m_cur_o;
         bool m_is_empty = false;
-
+        cltj::CTrie *m_trie;
+        //TODO: the following are legacy variables that needs to be refactor.
+        bool m_at_end;
+        bool m_at_root;
+        bool m_key_flag;
+        value_type m_depth;
+        value_type m_it;
+        value_type m_parent_it;
+        value_type m_pos_in_parent;
+        value_type m_key_val;
+        std::vector<std::string> m_order;
 
         void copy(const ltj_iterator &o) {
             m_ptr_triple_pattern = o.m_ptr_triple_pattern;
@@ -53,6 +64,57 @@ namespace ltj {
             m_cur_p = o.m_cur_p;
             m_cur_o = o.m_cur_o;
             m_is_empty = o.m_is_empty;
+            m_trie = o.m_trie;
+            m_at_end = o.m_at_end;
+            m_at_root = o.m_at_root;
+            m_key_flag = o.m_key_flag;
+            m_depth = o.m_depth;
+            m_it = o.m_it;
+            m_parent_it = o.m_parent_it;
+            m_pos_in_parent = o.m_pos_in_parent;
+            m_key_val = o.m_key_val;
+            m_order = o.m_order;
+        }
+
+        /*
+            Moves the iterator to the next key
+            TODO: Refactor.
+        */
+        void next(){
+            if(m_at_root){
+                throw "At root, doesn't have next";
+            }
+            if(m_at_end){
+                throw "Iterator is atEnd";
+            }
+
+            uint32_t parent_child_count = m_trie->childrenCount(m_parent_it);
+            if(parent_child_count == m_pos_in_parent){
+                m_at_end = true;
+            }
+            else{
+                m_pos_in_parent++;
+                m_it = m_trie->child(m_parent_it, m_pos_in_parent);
+            }
+        }
+        /*
+            Returns the key of the current position of the iterator
+            TODO: Refactor.
+        */
+        uint32_t key(){
+            if(m_at_end){
+                throw "Iterator is atEnd";
+            }
+            else if(m_at_root){
+                throw "Root doesnt have key";
+            }
+            else{
+                if(m_key_flag){
+                    m_key_flag = false;
+                    return m_key_val;
+                }
+                else return m_trie->key_at(m_it);
+            }
         }
     public:
         inline bool is_variable_subject(var_type var) {
@@ -74,13 +136,71 @@ namespace ltj {
 
         ltj_iterator() = default;
 
-        ltj_iterator(const rdf::triple_pattern *triple, index_scheme_type *index) {
+        ltj_iterator(const rdf::triple_pattern *triple, index_scheme_type *index, std::string order) {
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
             m_cur_s = -1UL;
             m_cur_p = -1UL;
             m_cur_o = -1UL;
-            
+
+            m_it = 2;
+            m_at_root = true;
+            m_at_end = false;
+            m_depth = -1;
+            m_key_flag = false;
+            m_trie = m_ptr_index->get_trie(order);
+            m_order.reserve(3);
+            //String to Vector
+            std::stringstream ss(order);
+            std::istream_iterator<std::string> begin(ss);
+            std::istream_iterator<std::string> end;
+            std::vector<std::string> vstrings(begin, end);
+            for(auto& vstring : vstrings){
+                m_order.emplace_back(vstring);
+            }
+            //TODO: Es esto mismo down?
+            m_at_root = false;
+
+            bool has_children = m_trie->childrenCount(m_it) != 0;
+            if(has_children){
+                m_parent_it = m_it;
+                m_it = m_trie->child(m_it, 1);
+                m_pos_in_parent = 1;
+                m_depth++;
+                //cout<<"printing key in iterator "<< order << " constructor "<<m_trie->key_at(m_it)<<endl;
+
+                //Processing all the constants.
+                size_type c;
+                for(const auto& o : m_order){
+                    if(m_is_empty)
+                        break;
+                    if (o == "0"){
+                        if(!m_ptr_triple_pattern->term_s.is_variable){
+                            c = leap(m_ptr_triple_pattern->term_s.value);
+                            if(c != m_ptr_triple_pattern->term_s.value){
+                                m_is_empty = true;
+                            }
+                        }
+                    } else if(o == "1"){
+                        if(!m_ptr_triple_pattern->term_p.is_variable){
+                            c = leap(m_ptr_triple_pattern->term_p.value);
+                            if(c != m_ptr_triple_pattern->term_p.value){
+                                m_is_empty = true;
+                            }
+                        }
+                    } else {
+                        if(!m_ptr_triple_pattern->term_o.is_variable){
+                            c = leap(m_ptr_triple_pattern->term_o.value);
+                            if(c != m_ptr_triple_pattern->term_o.value){
+                                m_is_empty = true;
+                            }
+                        }
+                    }
+                }
+            }else{
+                m_is_empty = true;
+            }
+            //TODO: Importante, marcar m_is_empty = true si corresponde!
         }
         const rdf::triple_pattern* get_triple_pattern() const{
             return m_ptr_triple_pattern;
@@ -112,6 +232,16 @@ namespace ltj {
                 m_cur_p = o.m_cur_p;
                 m_cur_o = o.m_cur_o;
                 m_is_empty = o.m_is_empty;
+                m_trie = o.m_trie;
+                m_at_end = o.m_at_end;
+                m_at_root = o.m_at_root;
+                m_key_flag = o.m_key_flag;
+                m_depth = o.m_depth;
+                m_it = o.m_it;
+                m_parent_it = o.m_parent_it;
+                m_pos_in_parent = o.m_pos_in_parent;
+                m_key_val = o.m_key_val;
+                m_order = o.m_order;
             }
             return *this;
         }
@@ -124,9 +254,25 @@ namespace ltj {
             std::swap(m_cur_p, o.m_cur_p);
             std::swap(m_cur_o, o.m_cur_o);
             std::swap(m_is_empty, o.m_is_empty);
+            std::swap(m_trie, o.m_trie);
+            std::swap(m_at_end, o.m_at_end);
+            std::swap(m_at_root, o.m_at_root);
+            std::swap(m_key_flag, o.m_key_flag);
+            std::swap(m_depth, o.m_depth);
+            std::swap(m_it, o.m_it);
+            std::swap(m_parent_it, o.m_parent_it);
+            std::swap(m_pos_in_parent, o.m_pos_in_parent);
+            std::swap(m_key_val, o.m_key_val);
+            std::swap(m_order, o.m_order);
         }
 
+        const size_type get_child_count() const{
+            return m_trie->childrenCount(m_it);
+        }
         void down(var_type var, size_type c) { //Go down in the trie
+            //TODO: Just go down one level in the trie :)
+
+            /*
             if (is_variable_subject(var)) {
                 if (m_cur_o != -1UL && m_cur_p != -1UL){
 #if VERBOSE
@@ -212,7 +358,7 @@ namespace ltj {
                 //m_states.emplace(state_type::o);
                 m_cur_o = c;
             }
-
+            */
         };
         //Reverses the intevals changed by a previous 'down' for subjects.
         void up_iter_sub(){
@@ -252,7 +398,8 @@ namespace ltj {
         }
         //Reverses the intervals and variable weights. Also resets the current value.
         void up(var_type var) { //Go up in the trie
-            if (is_variable_subject(var)) {
+            //TODO: Just go up once.
+            /*if (is_variable_subject(var)) {
                 up_iter_sub();
                 m_cur_s = -1UL;
 #if VERBOSE
@@ -271,182 +418,64 @@ namespace ltj {
                 std::cout << "Up in O" << std::endl;
 #endif
             }
-
+            */
         };
 
-        value_type leap(var_type var) { //Return the minimum in the range
-            //0. Which term of our triple pattern is var
-            if (is_variable_subject(var)) {
-                //1. We have to go down through s
-                if (m_cur_p != -1UL && m_cur_o != -1UL) {
-                    //PO->S
-#if VERBOSE
-                    std::cout << "min_S_in_PO" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_o != -1UL) {
-                    //O->S
-#if VERBOSE
-                    std::cout << "min_S_in_O" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_p != -1UL) {
-                    //P->S
-#if VERBOSE
-                    std::cout << "min_S_in_P" << std::endl;
-#endif
-                    return 0;
-                } else {
-                    //S
-#if VERBOSE
-                    std::cout << "min_S" << std::endl;
-#endif
-                    return 0;
+        value_type leap(size_type c) { //Return the minimum in the range
+            //TODO: just do next, isnt it?
+            //My version of LEAP...
+            /*bool exit = false;
+            value_type k = key();
+            while(!exit){
+                if(k == c){
+                    return c;
+                } else if(k > c){
+                    exit = true;
                 }
-            } else if (is_variable_predicate(var)) {
-                //1. We have to go down in the trie of p
-                if (m_cur_s != -1UL && m_cur_o != -1UL) {
-                    //SO->P
-#if VERBOSE
-                    std::cout << "min_P_in_SO" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_s != -1UL) {
-                    //S->P
-#if VERBOSE
-                    std::cout << "min_P_in_S" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_o != -1UL) {
-                    //O->P
-#if VERBOSE
-                    std::cout << "min_P_in_O" << std::endl;
-#endif
-                    return 0;
-                } else {
-                    //P
-#if VERBOSE
-                    std::cout << "min_P" << std::endl;
-#endif
-                    return 0;
-                }
-            } else if (is_variable_object(var)) {
-                //1. We have to go down in the trie of o
-                if (m_cur_s != -1UL && m_cur_p != -1UL) {
-                    //SP->O
-#if VERBOSE
-                    std::cout << "min_O_in_SP" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_s != -1UL) {
-                    //S->O
-#if VERBOSE
-                    std::cout << "min_O_in_S" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_p != -1UL) {
-                    //P->O
-#if VERBOSE
-                    std::cout << "min_O_in_P" << std::endl;
-#endif
-                    return 0;
-                } else {
-                    //O
-#if VERBOSE
-                    std::cout << "min_O" << std::endl;
-#endif
-                    return 0;
-                }
+                next();
+                k = key();
             }
-            return 0;
-        };
+            return -1;
+            */
+            //Theirs...
+            //Tomado de compact_trie_iv_iterator.seek
+            cout<<"Se llama a leap (prev. seek) de "<<c<<endl;
+            if(m_at_root){
+                throw "At root, cant seek";
+            }
+            if(m_at_end){
+                throw "At end, cant seek";
+            }
 
-        value_type leap(var_type var, size_type c) { //Return the next value greater or equal than c in the range
-            //0. Which term of our triple pattern is var
-            if (is_variable_subject(var)) {
-                //1. We have to go down through s
-                if (m_cur_p != -1UL && m_cur_o != -1UL) {
-                    //PO->S
-#if VERBOSE
-                    std::cout << "next_S_in_PO" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_o != -1UL) {
-                    //O->S
-#if VERBOSE
-                    std::cout << "next_S_in_O" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_p != -1UL) {
-                    //P->S
-#if VERBOSE
-                    std::cout << "next_S_in_P" << std::endl;
-#endif
-                    return 0;
-                } else {
-                    //S
-#if VERBOSE
-                    std::cout << "next_S" << std::endl;
-#endif
-                    return 0;
-                }
-            } else if (is_variable_predicate(var)) {
-                //1. We have to go down in the trie of p
-                if (m_cur_s != -1UL && m_cur_o != -1UL) {
-                    //SO->P
-#if VERBOSE
-                    std::cout << "next_P_in_SO" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_s != -1UL) {
-                    //S->P
-#if VERBOSE
-                    std::cout << "next_P_in_S" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_o != -1UL) {
-                    //O->P
-#if VERBOSE
-                    std::cout << "next_P_in_O" << std::endl;
-#endif
-                    return 0;
-                } else {
-                    //P
-#if VERBOSE
-                    std::cout << "next_P" << std::endl;
-#endif
-                    return 0;
-                }
-            } else if (is_variable_object(var)) {
-                //1. We have to go down in the trie of o
-                if (m_cur_s != -1UL && m_cur_p != -1UL) {
-                    //SP->O
-#if VERBOSE
-                    std::cout << "next_O_in_SP" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_s != -1UL) {
-                    //S->O
-#if VERBOSE
-                    std::cout << "next_O_in_S" << std::endl;
-#endif
-                    return 0;
-                } else if (m_cur_p != -1UL) {
-                    //P->O
-#if VERBOSE
-                    std::cout << "next_O_in_P" << std::endl;
-#endif
-                    return 0;
-                } else {
-                    //O
-#if VERBOSE
-                    std::cout << "next_O" << std::endl;
-#endif
-                    return 0;
-                }
+            // Nos indica cuantos hijos tiene el padre de el it actual ->O(1)
+            uint32_t parent_child_count = m_trie->childrenCount(m_parent_it);
+            // Nos indica cuantos 0s hay hasta it - 2, es decir la posición en el string de el char correspondiente a la posición del it -> O(1)
+            uint32_t i = m_trie->b_rank0(m_it)-2;
+            // Nos indica la posición en el string de el char correspondiente a la posición del ultimo hijo del padre del it. -> O(1)
+            uint32_t f = m_trie->b_rank0(m_trie->child(m_parent_it, parent_child_count))-2;
+
+            bool found = false;
+            /*cout<<"i y f "<<i<<" "<<f<<endl;
+            cout<<"parent_child_count "<<parent_child_count<<endl;
+            cout<<"it "<<m_it<<endl;
+
+            cout<<"calling binary_search "<<endl;*/
+            auto new_info = m_trie->binary_search_seek(c, i, f);
+            auto val = new_info.first;
+            auto pos = new_info.second;
+
+            if(pos == f+1){
+                m_at_end = true;
+                return -1;
             }
-            return 0;
-        }
+            else{
+                m_it = m_trie->b_sel0(pos+2)+1;
+                m_pos_in_parent = m_trie->childRank(m_it);
+                m_key_flag = true;
+                m_key_val = val;
+                return m_key_val;
+            }
+        };
 
         bool in_last_level(){
             return (m_cur_o !=-1UL && m_cur_p != -1UL) || (m_cur_s !=-1UL && m_cur_p != -1UL)

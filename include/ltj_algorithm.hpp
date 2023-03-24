@@ -305,9 +305,7 @@ namespace ltj {
             while (true){
                 //Compute leap for each triple that contains x_j
                 if(c == -1){
-                    c_i = itrs[i]->leap(x_j);
-                }else{
-                    c_i = itrs[i]->leap(x_j, c);
+                    c_i = itrs[i]->leap(c);
                 }
                 if(c_i == 0) return 0; //Empty intersection
                 n_ok = (c_i == c_prev) ? n_ok + 1 : 1;
