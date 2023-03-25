@@ -57,7 +57,7 @@ namespace ltj {
         std::vector<var_type> m_lonely_variables;
         std::stack<std::vector<std::pair<var_type, size_type>>> m_previous_values_stack;
         var_type m_starting_var;
-        var_to_iterators_type m_var_to_iterators;
+        var_to_iterators_type* m_var_to_iterators;//TODO: Ojo, quizas m_var_info tambien tiene que ser un puntero!
         size_type m_number_of_variables;
         size_type m_number_of_triples;
         //TODO: move to another function / class that manages the variable information.
@@ -125,7 +125,7 @@ namespace ltj {
         gao_size(const std::vector<rdf::triple_pattern>* triple_patterns,
                     std::vector<info_var_type> &var_info,
                     std::unordered_map<var_type, size_type> &hash_table_position,
-                    var_to_iterators_type &var_to_iterators,
+                    var_to_iterators_type *var_to_iterators,
                     index_type* r,
                     std::vector<var_type> &gao) : m_number_of_variables(0){
             m_ptr_triple_patterns = triple_patterns;//TODO: to be removed.
@@ -209,12 +209,12 @@ namespace ltj {
         }
 
         inline void add_var_to_iterator(const var_type var, ltj_iter_type* ptr_iterator){
-            auto it =  m_var_to_iterators.find(var);
-            if(it != m_var_to_iterators.end()){
+            auto it =  m_var_to_iterators->find(var);
+            if(it != m_var_to_iterators->end()){
                 it->second.push_back(ptr_iterator);
             }else{
                 std::vector<ltj_iter_type*> vec = {ptr_iterator};
-                m_var_to_iterators.insert({var, vec});
+                m_var_to_iterators->insert({var, vec});
             }
         }
         //! Copy constructor
@@ -270,7 +270,7 @@ namespace ltj {
             return m_lonely_variables;
         }
         /*Updates weights of the related vars of ´cur_var´*/
-        void update_weights(const size_type& j, const var_type& cur_var, const std::unordered_map<var_type, bool> &gao_vars,const var_to_iterators_type &m_var_to_iterators){
+        void update_weights(const size_type& j, const var_type& cur_var, const std::unordered_map<var_type, bool> &gao_vars, var_to_iterators_type &m_var_to_iterators){
             std::vector<std::pair<var_type, size_type>> previous_values;
             //Lonely vars are excluded of this process.
             if(j > 0 && j < m_lonely_start){
@@ -282,8 +282,8 @@ namespace ltj {
                         info_var_type& var_info = m_var_info[index];
                         size_type min_weight = -1ULL;
                         //All iterators of 'var'
-                        auto iters =  m_var_to_iterators.find(rel_var);
-                        if(iters != m_var_to_iterators.end()){
+                        auto iters =  m_var_to_iterators->find(rel_var);
+                        if(iters != m_var_to_iterators->end()){
                             std::vector<ltj_iter_type*> var_iters = iters->second;
                             for(ltj_iter_type* it : var_iters){
                                 //The iterator has a reference to its triple pattern.

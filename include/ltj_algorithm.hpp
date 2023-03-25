@@ -210,7 +210,7 @@ namespace ltj {
                 ++i;
                 //TODO: << move to another function / class that manages the variable information.
             }
-            m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, m_var_to_iterators, m_ptr_index, m_gao);
+            m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, &m_var_to_iterators, m_ptr_index, m_gao);
             //m_gao = {'\000', '\001', '\003', '\002'};
             //m_gao = {'\000', '\002', '\001', '\003'};
             m_gao_vars.reserve(m_gao_size.number_of_variables);
