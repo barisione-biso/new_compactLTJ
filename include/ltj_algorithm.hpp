@@ -213,7 +213,7 @@ namespace ltj {
             m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, m_var_to_iterators, m_ptr_index, m_gao);
             //m_gao = {'\000', '\001', '\003', '\002'};
             //m_gao = {'\000', '\002', '\001', '\003'};
-            m_gao_vars.reserve(m_gao_size.m_number_of_variables);
+            m_gao_vars.reserve(m_gao_size.number_of_variables);
         }
 
         //! Copy constructor
@@ -271,7 +271,7 @@ namespace ltj {
                   const size_type limit_results = 0, const size_type timeout_seconds = 0){
             if(m_is_empty) return;
             time_point_type start = std::chrono::high_resolution_clock::now();
-            tuple_type t(m_gao_size.m_number_of_variables);
+            tuple_type t(m_gao_size.number_of_variables);
             search(0, t, res, start, limit_results, timeout_seconds);
         };
 
@@ -330,7 +330,7 @@ namespace ltj {
             //(Optional) Check limit
             if(limit_results > 0 && res.size() == limit_results) return false;
 
-            if(j == m_gao_size.m_number_of_variables){
+            if(j == m_gao_size.number_of_variables){
                 //Report results
                 /*std::cout << "tuple : ";
                 for(auto& pair : tuple){

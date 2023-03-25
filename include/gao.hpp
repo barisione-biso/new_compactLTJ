@@ -47,7 +47,6 @@ namespace ltj {
         typedef var_to_iterators_t var_to_iterators_type;
         typedef std::pair<size_type, var_type> pair_type;
         typedef std::priority_queue<pair_type, std::vector<pair_type>, std::greater<pair_type>> min_heap_type;
-        size_type m_number_of_variables;
     private:
         const std::vector<rdf::triple_pattern>* m_ptr_triple_patterns;
         const std::vector<ltj_iter_type>* m_ptr_iterators;//TODO: remove?
@@ -59,6 +58,8 @@ namespace ltj {
         std::stack<std::vector<std::pair<var_type, size_type>>> m_previous_values_stack;
         var_type m_starting_var;
         var_to_iterators_type m_var_to_iterators;
+        size_type m_number_of_variables;
+        size_type m_number_of_triples;
         //TODO: move to another function / class that manages the variable information.
         void update_hash_var_index(typename std::vector<info_var_type>::iterator it_start, typename std::vector<info_var_type>::iterator it_end, std::unordered_map<var_type, size_type> &hash_table){
             int i=0;
@@ -116,6 +117,9 @@ namespace ltj {
             m_var_to_iterators = std::move(o.m_var_to_iterators);
         }
     public:
+        const size_type &number_of_variables = m_number_of_variables;
+        const size_type &number_of_triples = m_number_of_triples;
+
         gao_size() = default;
 
         gao_size(const std::vector<rdf::triple_pattern>* triple_patterns,
@@ -125,6 +129,7 @@ namespace ltj {
                     index_type* r,
                     std::vector<var_type> &gao) : m_number_of_variables(0){
             m_ptr_triple_patterns = triple_patterns;//TODO: to be removed.
+            m_number_of_triples = m_ptr_triple_patterns->size();
             //m_ptr_iterators = iterators;
             m_hash_table_position = hash_table_position;
             m_var_info = var_info;
@@ -181,14 +186,20 @@ namespace ltj {
             }
             //3. Up to here the gao is calculated. Now we need to set the iterators per variable,
             // based on the idea of 1 iterator per triple (For LTJ usage).
+
+            //We want to know per each v in gao and t in Q_{v}. Was t checked before? if no, check it, otherwise omit it.
+            std::vector<bool> checked(m_number_of_triples, false);
             for(auto& var: gao){
+                //per each var in gao.
                 auto& triple_iter_related = m_var_info[m_hash_table_position[var]].triple_iter_related_details;
+                //per each triple t in Q_{v}, where Q_{v} are triple patterns in which v participates (!t.empty).
                 for(auto& t : triple_iter_related){
-                    if(!t.empty){
+                    if(!t.empty && !checked[t.triple_number]){
                         auto& winning_iter = t.iterator;
-                        add_var_to_iterator(var, winning_iter);//TODO: hacer lo de !checked(var)
-                        for(auto& rel_var : t.related){
-                            add_var_to_iterator(rel_var, winning_iter);//TODO: hacer lo de !checked(var)
+                        add_var_to_iterator(var, winning_iter);
+                        checked[t.triple_number] = true;
+                        for(auto& rel_var : t.related){//related variables in t.
+                            add_var_to_iterator(rel_var, winning_iter);
                         }
 
                     }
