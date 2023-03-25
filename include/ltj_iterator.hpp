@@ -23,6 +23,7 @@
 #include <triple_pattern.hpp>
 #include <cltj_config.hpp>
 #include <vector>
+#include <utils.hpp>
 #define VERBOSE 0
 
 namespace ltj {
@@ -46,6 +47,10 @@ namespace ltj {
         value_type m_cur_o;
         bool m_is_empty = false;
         cltj::CTrie *m_trie;
+
+        var_type m_var_owner;
+        std::string m_var_order;
+        typedef std::vector<std::string> orders_type;
         //TODO: the following are legacy variables that needs to be refactor.
         bool m_at_end;
         bool m_at_root;
@@ -135,19 +140,21 @@ namespace ltj {
         const value_type &cur_o = m_cur_o;
 
         ltj_iterator() = default;
-
-        ltj_iterator(const rdf::triple_pattern *triple, index_scheme_type *index, std::string order) {
+        ltj_iterator(const rdf::triple_pattern *triple, var_type var, std::string var_order, index_scheme_type *index) {
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
             m_cur_s = -1UL;
             m_cur_p = -1UL;
             m_cur_o = -1UL;
+            m_var_owner = var;
+            m_var_order = var_order;
 
             m_it = 2;
             m_at_root = true;
             m_at_end = false;
             m_depth = -1;
             m_key_flag = false;
+            std::string order = get_order();
             m_trie = m_ptr_index->get_trie(order);
             m_order.reserve(3);
             //String to Vector
@@ -202,6 +209,38 @@ namespace ltj {
             }
             //TODO: Importante, marcar m_is_empty = true si corresponde!
         }
+        const std::string get_order(){
+            //a.
+            orders_type variables;
+            std::stringstream partial_order;
+            if(!m_ptr_triple_pattern->term_s.is_variable){
+                partial_order<<"0 ";
+            }else if((var_type) m_ptr_triple_pattern->term_s.value != m_var_owner){
+                variables.emplace_back("0");
+            }
+            if(!m_ptr_triple_pattern->term_p.is_variable){
+                partial_order<<"1 ";
+            }else if((var_type) m_ptr_triple_pattern->term_p.value != m_var_owner){
+                variables.emplace_back("1");
+            }
+            if(!m_ptr_triple_pattern->term_o.is_variable){
+                partial_order<<"2 ";
+            }else if((var_type) m_ptr_triple_pattern->term_o.value != m_var_owner){
+                variables.emplace_back("2");
+            }
+            //Adding the variable order, the "owner" of this iterator.
+            partial_order << m_var_order+ " ";
+            //b.
+            std::stringstream aux;
+            aux << partial_order.str();
+            for(const auto variable : variables){
+                aux << variable << " ";
+            }
+            std::string str = aux.str();
+            index_scheme::util::rtrim(str);
+            return str;
+        }
+
         const rdf::triple_pattern* get_triple_pattern() const{
             return m_ptr_triple_pattern;
         }

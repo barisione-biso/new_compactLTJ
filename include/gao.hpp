@@ -34,7 +34,7 @@
 #include <algorithm>
 namespace ltj {
 
-    template<class index_scheme_t = index_scheme::compactLTJ, class var_t = uint8_t, class cons_t = uint64_t, class ltj_iterator_t = ltj_iterator_manager<index_scheme_t, var_t, cons_t>>
+    template<class info_var_t, class var_to_iterators_t, class index_scheme_t = index_scheme::compactLTJ, class var_t = uint8_t, class cons_t = uint64_t, class ltj_iterator_t = ltj_iterator<index_scheme_t, var_t, cons_t>>
     class gao_size {
 
     public:
@@ -42,50 +42,24 @@ namespace ltj {
         typedef cons_t cons_type;
         typedef uint64_t size_type;
         typedef index_scheme_t index_type;
-        typedef struct {
-            var_type name;
-            size_type weight;
-            size_type n_triples;
-            std::unordered_set<var_type> related;
-        } info_var_type;
-        std::vector<info_var_type> m_var_info;
         typedef ltj_iterator_t ltj_iter_type;
+        typedef info_var_t info_var_type;
+        typedef var_to_iterators_t var_to_iterators_type;
         typedef std::pair<size_type, var_type> pair_type;
         typedef std::priority_queue<pair_type, std::vector<pair_type>, std::greater<pair_type>> min_heap_type;
-        typedef std::unordered_map<var_type, std::vector<ltj_iter_type*>> var_to_iterators_type;
         size_type m_number_of_variables;
     private:
         const std::vector<rdf::triple_pattern>* m_ptr_triple_patterns;
-        const std::vector<ltj_iter_type>* m_ptr_iterators;
+        const std::vector<ltj_iter_type>* m_ptr_iterators;//TODO: remove?
+        std::vector<info_var_type> m_var_info;
         std::unordered_map<var_type, size_type> m_hash_table_position;
         index_type* m_ptr_index;
         size_type m_lonely_start;
         std::vector<var_type> m_lonely_variables;
         std::stack<std::vector<std::pair<var_type, size_type>>> m_previous_values_stack;
         var_type m_starting_var;
-
-
-        void var_to_vector(const var_type var, const size_type size,
-                            std::unordered_map<var_type, size_type> &hash_table,
-                            std::vector<info_var_type> &vec){
-
-            auto it = hash_table.find(var);
-            if(it == hash_table.end()){
-                info_var_type info;
-                info.name = var;
-                info.weight = size;
-                info.n_triples = 1;
-                vec.emplace_back(info);
-                hash_table.insert({var, vec.size()-1});
-            }else{
-                info_var_type& info = vec[it->second];
-                ++info.n_triples;
-                if(info.weight > size){
-                    info.weight = size;
-                }
-            }
-        }
-
+        var_to_iterators_type m_var_to_iterators;
+        //TODO: move to another function / class that manages the variable information.
         void update_hash_var_index(typename std::vector<info_var_type>::iterator it_start, typename std::vector<info_var_type>::iterator it_end, std::unordered_map<var_type, size_type> &hash_table){
             int i=0;
             typename std::vector<info_var_type>::iterator it = it_start;
@@ -97,15 +71,6 @@ namespace ltj {
                 }
                 it = std::next(it);
             }
-        }
-        void var_to_related(const var_type var, const var_type rel,
-                            std::unordered_map<var_type, size_type> &hash_table,
-                            std::vector<info_var_type> &vec){
-
-            auto pos_var = hash_table[var];
-            vec[pos_var].related.insert(rel);
-            auto pos_rel = hash_table[rel];
-            vec[pos_rel].related.insert(var);
         }
 
         void fill_heap(const var_type var,
@@ -142,64 +107,32 @@ namespace ltj {
             m_ptr_triple_patterns = std::move(o.m_ptr_triple_patterns);
             m_ptr_iterators = std::move(o.m_ptr_iterators);
             m_ptr_index = std::move(o.m_ptr_index);
-            m_var_info = std::move(o.var_info);
+            m_var_info = std::move(o.m_var_info);
             m_lonely_variables = std::move(o.m_lonely_variables);
             m_hash_table_position = std::move(o.m_hash_table_position);
             m_number_of_variables = std::move(o.m_number_of_variables);
             m_lonely_start = std::move(o.m_lonely_start);
             m_starting_var = std::move(o.m_starting_var);
+            m_var_to_iterators = std::move(o.m_var_to_iterators);
         }
     public:
         gao_size() = default;
 
         gao_size(const std::vector<rdf::triple_pattern>* triple_patterns,
-                    const std::vector<ltj_iter_type>* iterators,
+                    std::vector<info_var_type> &var_info,
+                    std::unordered_map<var_type, size_type> &hash_table_position,
+                    var_to_iterators_type &var_to_iterators,
                     index_type* r,
                     std::vector<var_type> &gao) : m_number_of_variables(0){
-            m_ptr_triple_patterns = triple_patterns;
-            m_ptr_iterators = iterators;
+            m_ptr_triple_patterns = triple_patterns;//TODO: to be removed.
+            //m_ptr_iterators = iterators;
+            m_hash_table_position = hash_table_position;
+            m_var_info = var_info;
             m_ptr_index = r;
-
-
-            //1. Filling var_info with data about each variable
-            //std::cout << "Filling... " << std::flush;
-            //std::vector<info_var_type> var_info;
-            //std::unordered_map<var_type, size_type> hash_table_position;
+            m_var_to_iterators = var_to_iterators;
             size_type i = 0;
-            for (const rdf::triple_pattern& triple_pattern : *m_ptr_triple_patterns) {
-                var_type var_s, var_p, var_o;
-                bool s = false, p = false, o = false;
-                const size_type weight = m_ptr_iterators->at(i).get_child_count();
-                std::cout << "Iter "<< i<<" Calc. Min Weight : " << weight << std::endl;
-                if(triple_pattern.s_is_variable()){
-                    s = true;
-                    var_s = (var_type) triple_pattern.term_s.value;
-                    var_to_vector(var_s, weight,m_hash_table_position, m_var_info);
-                }
-                if(triple_pattern.p_is_variable()){
-                    p = true;
-                    var_p = (var_type) triple_pattern.term_p.value;
-                    var_to_vector(var_p, weight,m_hash_table_position, m_var_info);
-                }
-                if(triple_pattern.o_is_variable()){
-                    o = true;
-                    var_o = triple_pattern.term_o.value;
-                    var_to_vector(var_o, weight,m_hash_table_position, m_var_info);
-                }
-                if(s && p){
-                    var_to_related(var_s, var_p, m_hash_table_position, m_var_info);
-                }
-                if(s && o){
-                    var_to_related(var_s, var_o, m_hash_table_position, m_var_info);
-                }
-                if(p && o){
-                    var_to_related(var_p, var_o, m_hash_table_position, m_var_info);
-                }
-                ++i;
-            }
-            //std::cout << "Done. " << std::endl;
 
-            //2. Sorting variables according to their weights.
+            //1. Sorting variables according to their weights.
             //std::cout << "Sorting... " << std::flush;
             std::sort(m_var_info.begin(), m_var_info.end(), compare_var_info());
             update_hash_var_index(m_var_info.begin(), m_var_info.end(), m_hash_table_position);
@@ -219,7 +152,7 @@ namespace ltj {
                 m_starting_var = m_var_info[0].name;
                 //m_ptr_index->clear_cache();
             }else{
-                //3. Choosing the variables
+                //2. Choosing the variables
                 //std::cout << "Choosing GAO ... " << std::flush;
                 std::vector<bool> checked(m_var_info.size(), false);
                 while(i < m_lonely_start){ //Regular variables (not lonely)
@@ -246,9 +179,33 @@ namespace ltj {
                 }
                 m_starting_var = gao[0];
             }
-            std::cout << "Done. " << std::endl;
+            //3. Up to here the gao is calculated. Now we need to set the iterators per variable,
+            // based on the idea of 1 iterator per triple (For LTJ usage).
+            for(auto& var: gao){
+                auto& triple_iter_related = m_var_info[m_hash_table_position[var]].triple_iter_related_details;
+                for(auto& t : triple_iter_related){
+                    if(!t.empty){
+                        auto& winning_iter = t.iterator;
+                        add_var_to_iterator(var, winning_iter);//TODO: hacer lo de !checked(var)
+                        for(auto& rel_var : t.related){
+                            add_var_to_iterator(rel_var, winning_iter);//TODO: hacer lo de !checked(var)
+                        }
+
+                    }
+                }
+            }
+            std::cout << "done."<< std::endl;
         }
 
+        inline void add_var_to_iterator(const var_type var, ltj_iter_type* ptr_iterator){
+            auto it =  m_var_to_iterators.find(var);
+            if(it != m_var_to_iterators.end()){
+                it->second.push_back(ptr_iterator);
+            }else{
+                std::vector<ltj_iter_type*> vec = {ptr_iterator};
+                m_var_to_iterators.insert({var, vec});
+            }
+        }
         //! Copy constructor
         gao_size(const gao_size &o) {
             copy(o);
@@ -278,6 +235,7 @@ namespace ltj {
                 m_number_of_variables = std::move(o.m_number_of_variables);
                 m_lonely_start = std::move(o.m_lonely_start);
                 m_starting_var = std::move(o.m_starting_var);
+                m_var_to_iterators = std::move(o.m_var_to_iterators);
             }
             return *this;
         }
@@ -292,6 +250,7 @@ namespace ltj {
             std::swap(m_number_of_variables, o.m_number_of_variables);
             std::swap(m_lonely_start, o.m_lonely_start);
             std::swap(m_starting_var, o.m_starting_var);
+            std::swap(m_var_to_iterators, o.m_var_to_iterators);
         }
         std::unordered_set<var_type> get_related_variables(const var_type& var){
             return m_var_info[m_hash_table_position[var]].related;
