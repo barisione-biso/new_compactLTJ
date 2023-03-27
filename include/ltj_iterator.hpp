@@ -165,7 +165,7 @@ namespace ltj {
             for(auto& vstring : vstrings){
                 m_order.emplace_back(vstring);
             }
-            //TODO: Es esto mismo down?
+            //TODO: Código de open(). ¿Es esto lo mismo que down?
             m_at_root = false;
 
             bool has_children = m_trie->childrenCount(m_it) != 0;
@@ -174,30 +174,42 @@ namespace ltj {
                 m_it = m_trie->child(m_it, 1);
                 m_pos_in_parent = 1;
                 m_depth++;
-                //cout<<"printing key in iterator "<< order << " constructor "<<m_trie->key_at(m_it)<<endl;
+                //cout<<"printing key in iterator "<< order << " (constructor): "<<m_trie->key_at(m_it)<<endl;
 
                 //Processing all the constants.
-                size_type c;
+                size_type c = -1;
                 for(const auto& o : m_order){
                     if(m_is_empty)
                         break;
                     if (o == "0"){
                         if(!m_ptr_triple_pattern->term_s.is_variable){
+                            if(c!= -1){//Another constant was processed previously.
+                                down();
+                            }
                             c = leap(m_ptr_triple_pattern->term_s.value);
+                            m_cur_s = c;
                             if(c != m_ptr_triple_pattern->term_s.value){
                                 m_is_empty = true;
                             }
                         }
                     } else if(o == "1"){
                         if(!m_ptr_triple_pattern->term_p.is_variable){
+                            if(c!= -1){//Another constant was processed previously.
+                                down();
+                            }
                             c = leap(m_ptr_triple_pattern->term_p.value);
+                            m_cur_p = c;
                             if(c != m_ptr_triple_pattern->term_p.value){
                                 m_is_empty = true;
                             }
                         }
                     } else {
                         if(!m_ptr_triple_pattern->term_o.is_variable){
+                            if(c!= -1){//Another constant was processed previously.
+                                down();
+                            }
                             c = leap(m_ptr_triple_pattern->term_o.value);
+                            m_cur_o = c;
                             if(c != m_ptr_triple_pattern->term_o.value){
                                 m_is_empty = true;
                             }
@@ -308,96 +320,26 @@ namespace ltj {
         const size_type get_child_count() const{
             return m_trie->childrenCount(m_it);
         }
-        void down(var_type var, size_type c) { //Go down in the trie
+        void down(){//var_type var, size_type c) { //Go down in the trie
             //TODO: Just go down one level in the trie :)
-
-            /*
-            if (is_variable_subject(var)) {
-                if (m_cur_o != -1UL && m_cur_p != -1UL){
-#if VERBOSE
-                    std::cout << "Nothing to do" << std::endl;
-#endif
-                    return;
-                }
-                if (m_cur_o != -1UL) {
-                    //OS->P
-#if VERBOSE
-                    std::cout << "down_O_S" << std::endl;
-#endif
-                    nullptr;
-                } else if (m_cur_p != -1UL) {
-                    //PS->O
-#if VERBOSE
-                    std::cout << "down_P_S" << std::endl;
-#endif
-                    nullptr;
-                } else {
-                    //S->{OP,PO} same range in SOP and SPO
-#if VERBOSE
-                    std::cout << "down_S" << std::endl;
-#endif
-                    nullptr;
-                }
-                //m_states.emplace(state_type::s);
-                m_cur_s = c;
-            } else if (is_variable_predicate(var)) {
-                if (m_cur_s != -1UL && m_cur_o != -1UL){
-#if VERBOSE
-                    std::cout << "Nothing to do" << std::endl;
-#endif
-                    return;
-                }
-                if (m_cur_o != -1UL) {
-                    //OP->S
-#if VERBOSE
-                    std::cout << "down_O_P" << std::endl;
-#endif
-                    nullptr;
-                } else if (m_cur_s != -1UL) {
-                    //SP->O
-#if VERBOSE
-                    std::cout << "down_S_P" << std::endl;
-#endif
-                    nullptr;
-                } else {
-                    //P->{OS,SO} same range in POS and PSO
-#if VERBOSE
-                    std::cout << "down_P" << std::endl;
-#endif
-                    nullptr;
-                }
-                //m_states.emplace(state_type::p);
-                m_cur_p = c;
-            } else if (is_variable_object(var)) {
-                if (m_cur_s != -1UL && m_cur_p != -1UL){
-#if VERBOSE
-                    std::cout << "Nothing to do" << std::endl;
-#endif
-                    return;
-                }
-                if (m_cur_p != -1UL) {
-                    //PO->S
-#if VERBOSE
-                    std::cout << "down_P_O" << std::endl;
-#endif
-                    nullptr;
-                } else if (m_cur_s != -1UL) {
-                    //SO->P
-#if VERBOSE
-                    std::cout << "down_S_O" << std::endl;
-#endif
-                    nullptr;
-                } else {
-                    //O->{PS,SP} same range in OPS and OSP
-#if VERBOSE
-                    std::cout << "down_O" << std::endl;
-#endif
-                    nullptr;
-                }
-                //m_states.emplace(state_type::o);
-                m_cur_o = c;
+            if(m_at_root){
+                m_at_root = false;
             }
-            */
+            if(m_at_end){
+                throw "Iterator is atEnd";
+            }
+            else{
+                bool has_children = m_trie->childrenCount(m_it) != 0;
+                if(has_children){
+                    m_key_flag = false;//FABRIZIO: nuevo, para forzar a que key() recalcule la clave luego de este down.
+                    m_parent_it = m_it;
+                    m_it = m_trie->child(m_it, 1);
+                    m_pos_in_parent = 1;
+                    m_depth++;
+                    //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
+                }
+                else throw "Node has no children";
+            }
         };
         //Reverses the intevals changed by a previous 'down' for subjects.
         void up_iter_sub(){
@@ -461,6 +403,10 @@ namespace ltj {
         };
 
         value_type leap(size_type c) { //Return the minimum in the range
+            //If c=-1 we need to get the minimum value for the current level.
+            if(c== -1){
+                c = key();//LPM FALTA HACER UN DOWN EN LTJ_ITERATOR CONSTRUCTOR.
+            }
             //TODO: just do next, isnt it?
             //My version of LEAP...
             /*bool exit = false;
@@ -478,7 +424,7 @@ namespace ltj {
             */
             //Theirs...
             //Tomado de compact_trie_iv_iterator.seek
-            cout<<"Se llama a leap (prev. seek) de "<<c<<endl;
+            //cout<<"Se llama a leap (prev. seek) de "<<c<<endl;
             if(m_at_root){
                 throw "At root, cant seek";
             }
