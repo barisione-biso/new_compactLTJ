@@ -168,7 +168,7 @@ void query(const std::string &file, const std::string &queries, uint64_t number_
             results_type res;
             start = high_resolution_clock::now();
             ltj::ltj_algorithm<index_scheme_type> ltj(&query, &graph);
-            //ltj.join(res, number_of_results, timeout_in_millis);
+            ltj.join(res, number_of_results, timeout_in_millis);
 
             stop = high_resolution_clock::now();
             time_span = duration_cast<microseconds>(stop - start);

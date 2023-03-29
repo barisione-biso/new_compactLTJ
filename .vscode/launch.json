@@ -7,7 +7,7 @@
             "name": "FILTERED Query Index",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/query-index",
+            "program": "${workspaceFolder}/build/query_index",
             "args": ["/home/fabrizio/dcc_uchile/git_projects/data/wikidata_cltj/",
                     "Queries/Queries-wikidata-benchmark.txt", "1000", "600"],
             "stopAtEntry": true,

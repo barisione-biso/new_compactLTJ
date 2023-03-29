@@ -5,8 +5,8 @@
 #include <sstream> 
 #include <set>
 #include <map>
-#include "cltj_term.hpp"
-#include "cltj_tuple.hpp"
+#include <cltj_term.hpp>
+#include <cltj_tuple.hpp>
 #include <algorithm>
 
 namespace cltj {
