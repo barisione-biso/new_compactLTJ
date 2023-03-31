@@ -205,7 +205,7 @@ namespace ltj {
                     }
                 }
             }
-            std::cout << "done."<< std::endl;
+            //std::cout << "done."<< std::endl;
         }
 
         inline void add_var_to_iterator(const var_type var, ltj_iter_type* ptr_iterator){

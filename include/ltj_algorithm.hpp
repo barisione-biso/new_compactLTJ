@@ -144,7 +144,7 @@ namespace ltj {
 
                     s = true;
                     var_s = (var_type) triple.term_s.value;
-                    auto weight = iter->get_child_count();
+                    auto weight = iter->get_weight();
                     var_to_vector(var_s, weight, number_of_triples, m_hash_table_position, m_var_info);
 
                     auto& triple_iter_related = m_var_info[m_hash_table_position[var_s]].triple_iter_related_details[i];
@@ -164,7 +164,7 @@ namespace ltj {
 
                     p = true;
                     var_p = (var_type) triple.term_p.value;
-                    auto weight = iter->get_child_count();
+                    auto weight = iter->get_weight();
                     var_to_vector(var_p, weight, number_of_triples, m_hash_table_position, m_var_info);
 
                     auto& triple_iter_related = m_var_info[m_hash_table_position[var_p]].triple_iter_related_details[i];
@@ -184,7 +184,7 @@ namespace ltj {
 
                     o = true;
                     var_o = triple.term_o.value;
-                    auto weight = iter->get_child_count();
+                    auto weight = iter->get_weight();
                     var_to_vector(var_o, weight, number_of_triples, m_hash_table_position, m_var_info);
 
                     auto& triple_iter_related = m_var_info[m_hash_table_position[var_o]].triple_iter_related_details[i];
@@ -211,8 +211,6 @@ namespace ltj {
                 //TODO: << move to another function / class that manages the variable information.
             }
             m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, &m_var_to_iterators, m_ptr_index, m_gao);
-            //m_gao = {'\000', '\001', '\003', '\002'};
-            //m_gao = {'\000', '\002', '\001', '\003'};
             m_gao_vars.reserve(m_gao_size.number_of_variables);
         }
 
@@ -352,7 +350,7 @@ namespace ltj {
                         tuple[j] = {x_j, c};
                         //std::cout << "current var: " << int(std::get<0>(tuple[j])) << " = " << std::get<1>(tuple[j]) << std::endl;
                         //2. Going down in the trie by setting x_j = c (\mu(t_i) in paper)
-                        itrs[0]->down(x_j, c);
+                        itrs[0]->down(x_j);//x_j, c
                         //2. Search with the next variable x_{j+1}
                         ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
                         if(!ok) return false;
@@ -361,7 +359,7 @@ namespace ltj {
                     }
                 }else {
                     value_type c = seek(x_j);
-                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -369,7 +367,7 @@ namespace ltj {
                         //std::cout << "current var: " << int(std::get<0>(tuple[j])) << " = " << std::get<1>(tuple[j]) << std::endl;
                         //2. Going down in the tries by setting x_j = c (\mu(t_i) in paper)
                         for (ltj_iter_type* iter : itrs) {
-                            iter->down(x_j, c);
+                            iter->down(x_j);//x_j, c;
                         }
                         //3. Search with the next variable x_{j+1}
                         ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
@@ -380,7 +378,7 @@ namespace ltj {
                         }
                         //5. Next constant for x_j
                         c = seek(x_j, c + 1);
-                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 /*if(util::configuration.is_adaptive()){
@@ -392,7 +390,35 @@ namespace ltj {
             return true;
         };
 
-
+        void restart_var_level_iterator(const var_type x_j){
+            for (auto& iter : m_var_to_iterators[x_j]){
+                bool restart_iter = true;
+                //TODO: improve this linear search.
+                //Que la variable S del triple referenciado por el iterador 'iter' ya esté ligada y no sea x_j.
+                if(iter->get_triple_pattern()->term_s.is_variable &&
+                iter->get_triple_pattern()->term_s.value != x_j &&
+                m_gao_vars[iter->get_triple_pattern()->term_s.value]
+                ){
+                    restart_iter = false;
+                }
+                if(iter->get_triple_pattern()->term_p.is_variable &&
+                iter->get_triple_pattern()->term_p.value != x_j &&
+                m_gao_vars[iter->get_triple_pattern()->term_p.value]
+                ){
+                    restart_iter = false;
+                }
+                if(iter->get_triple_pattern()->term_o.is_variable &&
+                iter->get_triple_pattern()->term_o.value != x_j &&
+                m_gao_vars[iter->get_triple_pattern()->term_o.value]
+                ){
+                    restart_iter = false;
+                }
+                if(restart_iter){
+                    iter->up(x_j);
+                    iter->down(x_j);
+                }
+            }
+        }
         /**
          *
          * @param x_j   Variable
@@ -406,10 +432,11 @@ namespace ltj {
             value_type c_i, c_prev = 0, i = 0, n_ok = 0;
             while (true){
                 //Compute leap for each triple that contains x_j
-                if(c == -1){
-                    c_i = itrs[i]->leap(c);
+                c_i = itrs[i]->leap(c);
+                if(c_i == 0){
+                    restart_var_level_iterator(x_j);
+                    return 0; //Empty intersection
                 }
-                if(c_i == 0) return 0; //Empty intersection
                 n_ok = (c_i == c_prev) ? n_ok + 1 : 1;
                 if(n_ok == itrs.size()) return c_i;
                 c = c_prev = c_i;
