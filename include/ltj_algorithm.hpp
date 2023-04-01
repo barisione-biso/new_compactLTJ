@@ -350,7 +350,7 @@ namespace ltj {
                         tuple[j] = {x_j, c};
                         //std::cout << "current var: " << int(std::get<0>(tuple[j])) << " = " << std::get<1>(tuple[j]) << std::endl;
                         //2. Going down in the trie by setting x_j = c (\mu(t_i) in paper)
-                        itrs[0]->down(x_j);//x_j, c
+                        itrs[0]->down(x_j,c);//x_j, c
                         //2. Search with the next variable x_{j+1}
                         ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
                         if(!ok) return false;
@@ -367,7 +367,7 @@ namespace ltj {
                         //std::cout << "current var: " << int(std::get<0>(tuple[j])) << " = " << std::get<1>(tuple[j]) << std::endl;
                         //2. Going down in the tries by setting x_j = c (\mu(t_i) in paper)
                         for (ltj_iter_type* iter : itrs) {
-                            iter->down(x_j);//x_j, c;
+                            iter->down(x_j, c);
                         }
                         //3. Search with the next variable x_{j+1}
                         ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
@@ -390,7 +390,7 @@ namespace ltj {
             return true;
         };
 
-        void restart_var_level_iterator(const var_type x_j){
+        void restart_var_level_iterator(const var_type x_j,size_type c){
             for (auto& iter : m_var_to_iterators[x_j]){
                 bool restart_iter = true;
                 //TODO: improve this linear search.
@@ -413,9 +413,10 @@ namespace ltj {
                 ){
                     restart_iter = false;
                 }
+                //Y no faltará chequear que no estemos en el ultimo nivel? esos iters tampoco deben resetearse, it seems. //in_last_level?
                 if(restart_iter){
                     iter->up(x_j);
-                    iter->down(x_j);
+                    iter->down(x_j,c);
                 }
             }
         }
@@ -434,7 +435,7 @@ namespace ltj {
                 //Compute leap for each triple that contains x_j
                 c_i = itrs[i]->leap(c);
                 if(c_i == 0){
-                    restart_var_level_iterator(x_j);
+                    restart_var_level_iterator(x_j, c);
                     return 0; //Empty intersection
                 }
                 n_ok = (c_i == c_prev) ? n_ok + 1 : 1;

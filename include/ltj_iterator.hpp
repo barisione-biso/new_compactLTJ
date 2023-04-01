@@ -173,17 +173,17 @@ namespace ltj {
                             break;
                         }
                         //Down for a constant
-                        if(m_depth<2){
-                            bool has_children = m_trie->childrenCount(m_it) != 0;
-                            if(has_children){
-                                m_parent_it = m_it;
-                                m_it = m_trie->child(m_it, 1);
-                                //m_prev_pos_in_parent = m_pos_in_parent;
-                                m_pos_in_parent = 1;
-                                m_depth++;
-                                //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                            }
+                        bool has_children = m_trie->childrenCount(m_it) != 0;
+                        if(has_children){
+                            m_parent_it = m_it;
+                            m_it = m_trie->child(m_it, 1);
+                            //m_prev_pos_in_parent = m_pos_in_parent;
+                            m_pos_in_parent = 1;
+                            m_depth++;
+                            //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                             m_cur_s = c;
+                        }else{
+                            m_is_empty = true;
                         }
                         m_number_of_constants++;
                     }
@@ -195,18 +195,19 @@ namespace ltj {
                             break;
                         }
                         //Down for a constant
-                        if(m_depth<2){
-                            bool has_children = m_trie->childrenCount(m_it) != 0;
-                            if(has_children){
-                                m_parent_it = m_it;
-                                m_it = m_trie->child(m_it, 1);
-                                //m_prev_pos_in_parent = m_pos_in_parent;
-                                m_pos_in_parent = 1;
-                                m_depth++;
-                                //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                            }
+                        bool has_children = m_trie->childrenCount(m_it) != 0;
+                        if(has_children){
+                            m_parent_it = m_it;
+                            m_it = m_trie->child(m_it, 1);
+                            //m_prev_pos_in_parent = m_pos_in_parent;
+                            m_pos_in_parent = 1;
+                            m_depth++;
+                            //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                             m_cur_p = c;
+                        }else{
+                            m_is_empty = true;
                         }
+                        
                         m_number_of_constants++;
                     }
                 } else {
@@ -217,17 +218,17 @@ namespace ltj {
                             break;
                         }
                         //Down for a constant
-                        if(m_depth<2){
-                            bool has_children = m_trie->childrenCount(m_it) != 0;
-                            if(has_children){
-                                m_parent_it = m_it;
-                                m_it = m_trie->child(m_it, 1);
-                                //m_prev_pos_in_parent = m_pos_in_parent;
-                                m_pos_in_parent = 1;
-                                m_depth++;
-                                //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                            }
+                        bool has_children = m_trie->childrenCount(m_it) != 0;
+                        if(has_children){
+                            m_parent_it = m_it;
+                            m_it = m_trie->child(m_it, 1);
+                            //m_prev_pos_in_parent = m_pos_in_parent;
+                            m_pos_in_parent = 1;
+                            m_depth++;
+                            //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                             m_cur_o = c;
+                        }else{
+                            m_is_empty = true;
                         }
                         m_number_of_constants++;
                     }
@@ -340,7 +341,7 @@ namespace ltj {
         const size_type get_weight() const{
             return m_trie->childrenCount(m_parent_it);
         }
-        void down(var_type var){// Go down in the trie
+        void down(var_type var, size_type c){// Go down in the trie
             if(m_at_root){
                 m_at_root = false;
             }
@@ -360,6 +361,7 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
+                m_cur_s = c;
             }
             if (is_variable_predicate(var)) {
                 if (m_cur_s != -1UL && m_cur_o != -1UL){
@@ -376,6 +378,7 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
+                m_cur_p = c;
             }
             if (is_variable_object(var)) {
                 if (m_cur_s != -1UL && m_cur_p != -1UL){
@@ -392,6 +395,7 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
+                m_cur_o = c;
             }
         };
         //Reverses the intervals and variable weights. Also resets the current value.
