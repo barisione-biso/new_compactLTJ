@@ -354,12 +354,26 @@ namespace ltj {
                         //4. Going up in the trie by removing x_j = c
                         itrs[0]->up(x_j);
                     }
-                    if(results.size() == 0){
-                        restart_iterator(itrs[0], x_j);
-                    }
+                    /*else{
+                        if(is_bound_subject_variable(itrs[0]) &&
+                        iter->get_triple_pattern()->term_s.value != x_j
+                        ){
+                            restart_iterator(itrs[0], x_j);
+                        }
+                        if(is_bound_predicate_variable(itrs[0]) &&
+                        iter->get_triple_pattern()->term_p.value != x_j
+                        ){
+                            restart_iterator(itrs[0], x_j);
+                        }
+                        if(is_bound_object_variable(iter) &&
+                        iter->get_triple_pattern()->term_o.value != x_j
+                        ){
+                            restart_iterator(itrs[0], x_j);
+                        }
+                    }*/
                 }else {
                     value_type c = seek(x_j, j);
-                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -378,7 +392,7 @@ namespace ltj {
                         }
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);
-                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
@@ -429,18 +443,15 @@ namespace ltj {
                     restart_iter = false;
                 }
                 if(restart_iter){
-                    restart_iterator(iter,x_j, c);
+                    iter->restart_level_iterator(x_j, c);
                 }
             }
         }
         /*
-        When we require to restart a given iterator, by going to the first position in parent node.
-        Useful when the list of values at a certain level has to be revisited from the beginning.
-        */
-        void restart_iterator(ltj_iter_type* iter, const var_type x_j, size_type c = -1){
-            iter->up(x_j);
-            iter->down(x_j,c);
+        std::vector<uint64_t> seek_all(ltj_iter_type* iter,var_type x_j){
+            return iter->seek_all(x_j);
         }
+        */
         /**
          *
          * @param x_j   Variable

@@ -461,11 +461,11 @@ namespace ltj {
             uint32_t f = m_trie->b_rank0(m_trie->child(m_parent_it, parent_child_count))-2;
 
             bool found = false;
-            /*cout<<"i y f "<<i<<" "<<f<<endl;
+            cout<<"i y f "<<i<<" "<<f<<endl;
             cout<<"parent_child_count "<<parent_child_count<<endl;
             cout<<"it "<<m_it<<endl;
 
-            cout<<"calling binary_search "<<endl;*/
+            cout<<"calling binary_search "<<endl;
             auto new_info = m_trie->binary_search_seek(c, i, f);
             auto val = new_info.first;
             auto pos = new_info.second;
@@ -498,8 +498,10 @@ namespace ltj {
             return at_end;
         }*/
         std::vector<uint64_t> seek_all(var_type var){
+
             std::vector<uint64_t> results;
             bool finished = false;
+
             if(!m_at_root){
                 while(!m_at_end && !finished){
                     if(results.size() >= index_scheme::util::configuration.get_number_of_results()){
@@ -508,19 +510,31 @@ namespace ltj {
                         uint32_t m_parent_child_count = m_trie->childrenCount(m_parent_it);
                         if(m_parent_child_count == m_pos_in_parent){
                             m_at_end = true;
+                            results.emplace_back(m_trie->key_at(m_it));//TODO: key() returns 0 when m_at_end == true. Standarize.
                         }
                         else{
+                            results.emplace_back(key());
                             m_pos_in_parent++;
                             m_it = m_trie->child(m_parent_it, m_pos_in_parent);
-                            results.emplace_back(key());
                         }
                     }
                 }
+            }
+            if(results.size()==0){
+                restart_level_iterator(var);
             }
             return results;
         }
         const value_type get_depth() const{
             return m_depth;
+        }
+        /*
+        When we require to restart a given iterator, by going to the first position in parent node.
+        Useful when the list of values at a certain level has to be revisited from the beginning.
+        */
+        void restart_level_iterator(const var_type x_j, size_type c = -1){
+            up(x_j);
+            down(x_j,c);
         }
     };
 
