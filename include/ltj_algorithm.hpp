@@ -25,12 +25,11 @@
 
 #include <triple_pattern.hpp>
 #include <cltj.hpp>
-#include <ltj_iterator_manager.hpp>
 #include <gao.hpp>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-
+#include <ltj_iterator.hpp>
 namespace ltj {
 
     template<class index_scheme_t = index_scheme::compactLTJ, class var_t = uint8_t, class cons_t = uint64_t, class ltj_iterator_t = ltj_iterator<index_scheme_t, var_t,cons_t>>//, class gao = gao_t<>
@@ -281,7 +280,7 @@ namespace ltj {
             return str;
         }
         var_type next(const size_type j) {
-            /*if(util::configuration.is_adaptive()){
+            if(index_scheme::util::configuration.is_adaptive()){
                 var_type var = '\0';
                 const var_type& cur_var = m_gao_stack.top();
                 const std::unordered_map<var_type, bool> & b_vars = m_gao_vars;
@@ -289,9 +288,7 @@ namespace ltj {
                 var = m_gao_size.get_next_var(j, m_gao_vars);
                 return var;
             }
-            else{*/
-                return m_gao[j];
-            //}
+            return m_gao[j];
         }
 
         void push_var_to_stack(const var_type& x_j){
@@ -357,9 +354,12 @@ namespace ltj {
                         //4. Going up in the trie by removing x_j = c
                         itrs[0]->up(x_j);
                     }
+                    if(results.size() == 0){
+                        restart_iterator(itrs[0], x_j);
+                    }
                 }else {
-                    value_type c = seek(x_j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    value_type c = seek(x_j, j);
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -377,65 +377,87 @@ namespace ltj {
                             iter->up(x_j);
                         }
                         //5. Next constant for x_j
-                        c = seek(x_j, c + 1);
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        c = seek(x_j, j, c + 1);
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
-                /*if(util::configuration.is_adaptive()){
+                if(index_scheme::util::configuration.is_adaptive()){
                     m_gao_size.set_previous_weight();
-                }*/
+                }
                 pop_var_of_stack();
                 //std::cout << " pop. " << std::endl;
             }
             return true;
         };
 
-        void restart_var_level_iterator(const var_type x_j,size_type c){
+        bool inline is_bound_subject_variable(ltj_iter_type* iter){
+            return iter->get_triple_pattern()->term_s.is_variable &&
+                m_gao_vars[iter->get_triple_pattern()->term_s.value];
+        }
+
+        bool inline is_bound_predicate_variable(ltj_iter_type* iter){
+            return iter->get_triple_pattern()->term_p.is_variable &&
+                m_gao_vars[iter->get_triple_pattern()->term_p.value];
+        }
+
+        bool inline is_bound_object_variable(ltj_iter_type* iter){
+            return iter->get_triple_pattern()->term_o.is_variable &&
+                m_gao_vars[iter->get_triple_pattern()->term_o.value];
+        }
+        /*
+        Called within seek() before returning 0 when leap() finds no intersection.
+        */
+        void check_restart_var_level_iterator(const var_type x_j,const size_type j, size_type c){
             for (auto& iter : m_var_to_iterators[x_j]){
                 bool restart_iter = true;
                 //TODO: improve this linear search.
-                //Que la variable S del triple referenciado por el iterador 'iter' ya esté ligada y no sea x_j.
-                if(iter->get_triple_pattern()->term_s.is_variable &&
-                iter->get_triple_pattern()->term_s.value != x_j &&
-                m_gao_vars[iter->get_triple_pattern()->term_s.value]
+                //If in the triple referred by iterator 'iter' there is a bound variable in the subject that is not 'x_j'.
+                //We have to restart from from the first child of the parent node, which is accomplished with an up() followed by a down().
+                if(is_bound_subject_variable(iter) &&
+                iter->get_triple_pattern()->term_s.value != x_j
                 ){
                     restart_iter = false;
                 }
-                if(iter->get_triple_pattern()->term_p.is_variable &&
-                iter->get_triple_pattern()->term_p.value != x_j &&
-                m_gao_vars[iter->get_triple_pattern()->term_p.value]
+                if(is_bound_predicate_variable(iter) &&
+                iter->get_triple_pattern()->term_p.value != x_j
                 ){
                     restart_iter = false;
                 }
-                if(iter->get_triple_pattern()->term_o.is_variable &&
-                iter->get_triple_pattern()->term_o.value != x_j &&
-                m_gao_vars[iter->get_triple_pattern()->term_o.value]
+                if(is_bound_object_variable(iter) &&
+                iter->get_triple_pattern()->term_o.value != x_j
                 ){
                     restart_iter = false;
                 }
-                //Y no faltará chequear que no estemos en el ultimo nivel? esos iters tampoco deben resetearse, it seems. //in_last_level?
                 if(restart_iter){
-                    iter->up(x_j);
-                    iter->down(x_j,c);
+                    restart_iterator(iter,x_j, c);
                 }
             }
+        }
+        /*
+        When we require to restart a given iterator, by going to the first position in parent node.
+        Useful when the list of values at a certain level has to be revisited from the beginning.
+        */
+        void restart_iterator(ltj_iter_type* iter, const var_type x_j, size_type c = -1){
+            iter->up(x_j);
+            iter->down(x_j,c);
         }
         /**
          *
          * @param x_j   Variable
+         * @param j     Number of variables eliminated
          * @param c     Constant. If it is unknown the value is -1
          * @return      The next constant that matches the intersection between the triples of x_j.
          *              If the intersection is empty, it returns 0.
          */
 
-        value_type seek(const var_type x_j, value_type c=-1){
+        value_type seek(const var_type x_j, const size_type j, value_type c=-1){
             std::vector<ltj_iter_type*>& itrs = m_var_to_iterators[x_j];
             value_type c_i, c_prev = 0, i = 0, n_ok = 0;
             while (true){
                 //Compute leap for each triple that contains x_j
                 c_i = itrs[i]->leap(c);
                 if(c_i == 0){
-                    restart_var_level_iterator(x_j, c);
+                    check_restart_var_level_iterator(x_j, j, c);
                     return 0; //Empty intersection
                 }
                 n_ok = (c_i == c_prev) ? n_ok + 1 : 1;

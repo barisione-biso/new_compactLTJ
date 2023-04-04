@@ -195,21 +195,39 @@ void query(const std::string &file, const std::string &queries, uint64_t number_
 int main(int argc, char* argv[])
 {
     typedef index_scheme::compactLTJ index_scheme_type;
-    if(argc != 5){
-        std::cout << "Usage: " << argv[0] << " <index> <queries> <result_limit> <timeout>"<< std::endl;
+    if(argc < 3 || argc > 8){
+        std::cout << "Usage: " << argv[0] << "<index> <queries> "+ index_scheme::util::configuration.get_configuration_options() << std::endl;
         return 0;
     }
-
     std::string index = argv[1];
     std::string queries = argv[2];
+
+    //configuration: execution mode.
+    std::string mode = "";
+    if(argc >= 3 && argv[3]){
+        mode = argv[3];
+    }
+    //configuration: print gao (yes / no).
+    bool print_gao = false;
+    if(argc >= 4 && argv[4]){
+        std::istringstream(argv[4]) >> print_gao;
+    }
+    //configuration: verbose (yes / no).
+    bool verbose = false;
+    if(argc >= 5 && argv[5]){
+        std::istringstream(argv[5]) >> verbose;
+    }
     uint64_t number_of_results = 1000;
-    if(std::stoull(argv[3])){
-        number_of_results = std::stoull(argv[3]);
+    if(argc >= 6 && argv[6]){
+        number_of_results = std::stoull(argv[6]);
     }
     uint64_t timeout = 600;
-    if(std::stoull(argv[4])){
-        timeout = std::stoull(argv[4]);
+    if(argc >= 7 && argv[7]){
+        timeout = std::stoull(argv[7]);
     }
+    index_scheme::util::configuration.configure(mode, print_gao, verbose, number_of_results, timeout);
+    //print configuration.
+    index_scheme::util::configuration.print_configuration();
 
     //Starting quering the index.
     query<index_scheme_type>(index, queries, number_of_results, timeout);

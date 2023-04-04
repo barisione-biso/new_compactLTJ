@@ -27,11 +27,11 @@
 #include <unordered_set>
 #include <cltj.hpp>
 #include <utils.hpp>
-#include <ltj_iterator_manager.hpp>
 #include <queue>
 #include <functional>
 #include <stack>
 #include <algorithm>
+#include <ltj_iterator.hpp>
 namespace ltj {
 
     template<class info_var_t, class var_to_iterators_t, class index_scheme_t = index_scheme::compactLTJ, class var_t = uint8_t, class cons_t = uint64_t, class ltj_iterator_t = ltj_iterator<index_scheme_t, var_t, cons_t>>
@@ -153,7 +153,7 @@ namespace ltj {
             m_lonely_variables.reserve(m_var_info.size() - m_lonely_start);
             //std::cout << "Done. " << std::endl;
             i = 0;
-            if(false){// index_scheme::util::configuration.is_adaptive()){
+            if(index_scheme::util::configuration.is_adaptive()){
                 m_starting_var = m_var_info[0].name;
                 //m_ptr_index->clear_cache();
             }else{
@@ -270,7 +270,7 @@ namespace ltj {
             return m_lonely_variables;
         }
         /*Updates weights of the related vars of ´cur_var´*/
-        void update_weights(const size_type& j, const var_type& cur_var, const std::unordered_map<var_type, bool> &gao_vars, var_to_iterators_type &m_var_to_iterators){
+        void update_weights(const size_type& j, const var_type& cur_var, const std::unordered_map<var_type, bool> &gao_vars,const var_to_iterators_type &m_var_to_iterators){
             std::vector<std::pair<var_type, size_type>> previous_values;
             //Lonely vars are excluded of this process.
             if(j > 0 && j < m_lonely_start){
@@ -282,15 +282,15 @@ namespace ltj {
                         info_var_type& var_info = m_var_info[index];
                         size_type min_weight = -1ULL;
                         //All iterators of 'var'
-                        auto iters =  m_var_to_iterators->find(rel_var);
-                        if(iters != m_var_to_iterators->end()){
+                        auto iters =  m_var_to_iterators.find(rel_var);
+                        if(iters != m_var_to_iterators.end()){
                             std::vector<ltj_iter_type*> var_iters = iters->second;
                             for(ltj_iter_type* it : var_iters){
                                 //The iterator has a reference to its triple pattern.
                                 //const triple_pattern& triple_pattern = *(it->get_triple_pattern());
                                 const ltj_iter_type &iter = *it;
                                 size_type weight = 0;
-                                weight = iter.get_child_count();
+                                weight = iter.get_weight();
                                 if(weight < min_weight){
                                     min_weight = weight;
                                 }

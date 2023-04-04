@@ -49,7 +49,6 @@ namespace ltj {
         bool m_is_empty = false;
         cltj::CTrie *m_trie;
         size_type m_number_of_constants;
-        //value_type m_prev_pos_in_parent;
 
         var_type m_var_owner;
         std::string m_var_order;
@@ -133,6 +132,23 @@ namespace ltj {
             m_key_flag = false;
             std::string order = get_order();
             m_trie = m_ptr_index->get_trie(order);
+            /*
+            //TEST>>
+            auto aux = m_trie->find_seq_number(15322210);
+            uint32_t node = 0;
+            for ( uint32_t i=3; i < 153980665; i++){
+                auto aux = m_trie->key_at(i);
+                if(aux == 15322210){
+                    std::cout << i << std::endl;//R: 98393844, 98393845, 102631651, 102631652.
+                    node = i;
+                }
+            }
+            auto key = m_trie->key_at(node);//15322210.
+            auto parent_node = m_trie->parent(node);
+            auto post_in_parent = m_trie->getPosInParent(node);
+            auto child_rank = m_trie->childRank(node);
+            //TEST<<
+            */
             m_order.reserve(3);
             //String to Vector
             std::stringstream ss(order);
@@ -142,7 +158,7 @@ namespace ltj {
             for(auto& vstring : vstrings){
                 m_order.emplace_back(vstring);
             }
-            m_depth++;//taken from triejoin_open()
+            //m_depth++;//taken from triejoin_open()
             //Starting down (open)
             m_at_root = false;
             bool has_children = m_trie->childrenCount(m_it) != 0;
@@ -207,7 +223,7 @@ namespace ltj {
                         }else{
                             m_is_empty = true;
                         }
-                        
+
                         m_number_of_constants++;
                     }
                 } else {
@@ -481,16 +497,27 @@ namespace ltj {
         /*bool is_at_end(){
             return at_end;
         }*/
-        //Solo funciona en último nivel, en otro caso habría que reajustar
         std::vector<uint64_t> seek_all(var_type var){
-            /*if (is_variable_subject(var)){
-                return std::vector<uint64_t>();
-            }else if (is_variable_predicate(var)){
-                return std::vector<uint64_t>();
-            }else if (is_variable_object(var)){
-                return std::vector<uint64_t>();
-            }*/
-            return std::vector<uint64_t>();
+            std::vector<uint64_t> results;
+            bool finished = false;
+            if(!m_at_root){
+                while(!m_at_end && !finished){
+                    if(results.size() >= index_scheme::util::configuration.get_number_of_results()){
+                        finished = true;
+                    }else{
+                        uint32_t m_parent_child_count = m_trie->childrenCount(m_parent_it);
+                        if(m_parent_child_count == m_pos_in_parent){
+                            m_at_end = true;
+                        }
+                        else{
+                            m_pos_in_parent++;
+                            m_it = m_trie->child(m_parent_it, m_pos_in_parent);
+                            results.emplace_back(key());
+                        }
+                    }
+                }
+            }
+            return results;
         }
         const value_type get_depth() const{
             return m_depth;

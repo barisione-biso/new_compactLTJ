@@ -4,12 +4,36 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [{
-            "name": "FILTERED Query Index",
+            "name": "FILTERED CLTJ Query Index",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/query_index",
             "args": ["/home/fabrizio/dcc_uchile/git_projects/data/wikidata_cltj/",
-                    "Queries/Queries-wikidata-benchmark.txt", "1000", "600"],
+                    "Queries/Queries-wikidata-benchmark.txt",
+                    "cltj",
+                    "0", "1"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "FILTERED ADAPTIVE CLTJ Query Index",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query_index",
+            "args": ["/home/fabrizio/dcc_uchile/git_projects/data/wikidata_cltj/",
+                    "Queries/Queries-wikidata-benchmark.txt",
+                    "adaptive_cltj",
+                    "0", "1"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

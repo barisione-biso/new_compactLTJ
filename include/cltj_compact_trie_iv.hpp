@@ -168,6 +168,17 @@ namespace cltj {
                 }
                 return maximum;
             }
+
+            uint32_t find_seq_number(uint32_t key){
+                uint32_t count = 0;
+                for(auto val: seq){
+                    count++;
+                    if(val == key){
+                        return count;
+                    }
+                }
+                return count;
+            }
     };
 }
 #endif
