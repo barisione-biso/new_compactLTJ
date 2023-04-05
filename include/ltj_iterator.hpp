@@ -62,7 +62,8 @@ namespace ltj {
         value_type m_parent_it;
         value_type m_pos_in_parent;
         value_type m_key_val;
-        std::vector<std::string> m_order;
+        std::vector<uint64_t> m_order;
+        std::vector<rdf::term_pattern> m_vars_order;
 
         void copy(const ltj_iterator &o) {
             m_ptr_triple_pattern = o.m_ptr_triple_pattern;
@@ -150,13 +151,22 @@ namespace ltj {
             //TEST<<
             */
             m_order.reserve(3);
+            m_vars_order.reserve(3);
             //String to Vector
             std::stringstream ss(order);
             std::istream_iterator<std::string> begin(ss);
             std::istream_iterator<std::string> end;
             std::vector<std::string> vstrings(begin, end);
             for(auto& vstring : vstrings){
-                m_order.emplace_back(vstring);
+                auto aux = std::stoull(vstring);
+                m_order.emplace_back(aux);
+                if(aux == 0){
+                    m_vars_order.emplace_back(m_ptr_triple_pattern->term_s);
+                }else if(aux == 1){
+                    m_vars_order.emplace_back(m_ptr_triple_pattern->term_p);
+                }else{
+                    m_vars_order.emplace_back(m_ptr_triple_pattern->term_o);
+                }
             }
             //m_depth++;//taken from triejoin_open()
             //Starting down (open)
@@ -181,7 +191,7 @@ namespace ltj {
             for(const auto& o : m_order){
                 if(m_is_empty)
                     break;
-                if (o == "0"){
+                if (o == 0){
                     if(!m_ptr_triple_pattern->term_s.is_variable){
                         c = leap(m_ptr_triple_pattern->term_s.value);
                         if(c != m_ptr_triple_pattern->term_s.value){
@@ -203,7 +213,7 @@ namespace ltj {
                         }
                         m_number_of_constants++;
                     }
-                } else if(o == "1"){
+                } else if(o == 1){
                     if(!m_ptr_triple_pattern->term_p.is_variable){
                         c = leap(m_ptr_triple_pattern->term_p.value);
                         if(c != m_ptr_triple_pattern->term_p.value){
@@ -357,13 +367,13 @@ namespace ltj {
         const size_type get_weight() const{
             return m_trie->childrenCount(m_parent_it);
         }
-        void down(var_type var, size_type c){// Go down in the trie
+        void down(var_type var, size_type c = -1UL){// Go down in the trie
             if(m_at_root){
                 m_at_root = false;
             }
             //if(!m_at_end)
             if (is_variable_subject(var)) {
-                if (m_cur_o != -1UL && m_cur_p != -1UL){
+                if (m_depth == 2){//m_cur_o != -1UL && m_cur_p != -1UL){
                     //Do nothing
                     return;
                 }else{
@@ -377,10 +387,11 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
-                m_cur_s = c;
+                if(c != -1UL)
+                    m_cur_s = c;
             }
             if (is_variable_predicate(var)) {
-                if (m_cur_s != -1UL && m_cur_o != -1UL){
+                if (m_depth == 2){//if (m_cur_s != -1UL && m_cur_o != -1UL){
                     //Do nothing
                     return;
                 }else{
@@ -394,10 +405,11 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
-                m_cur_p = c;
+                if(c != -1UL)
+                    m_cur_p = c;
             }
             if (is_variable_object(var)) {
-                if (m_cur_s != -1UL && m_cur_p != -1UL){
+                if (m_depth == 2){//if (m_cur_s != -1UL && m_cur_p != -1UL){
                     //Do nothing
                     return;
                 }else{
@@ -411,19 +423,24 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
-                m_cur_o = c;
+                if(c != -1UL)
+                    m_cur_o = c;
             }
         };
         //Reverses the intervals and variable weights. Also resets the current value.
         void up(var_type var){ //Go up in the trie
             if(!m_at_root){
+                //uint64_t aux = -1UL;
                 if (is_variable_subject(var)) {
+                    //aux = m_cur_s;
                     m_cur_s = -1UL;
                 }
                 if (is_variable_predicate(var)) {
+                    //aux = m_cur_p;
                     m_cur_p = -1UL;
                 }
                 if (is_variable_object(var)) {
+                    //aux = m_cur_o;
                     m_cur_o = -1UL;
                 }
 
@@ -461,11 +478,13 @@ namespace ltj {
             uint32_t f = m_trie->b_rank0(m_trie->child(m_parent_it, parent_child_count))-2;
 
             bool found = false;
+            /*
             cout<<"i y f "<<i<<" "<<f<<endl;
             cout<<"parent_child_count "<<parent_child_count<<endl;
             cout<<"it "<<m_it<<endl;
 
             cout<<"calling binary_search "<<endl;
+            */
             auto new_info = m_trie->binary_search_seek(c, i, f);
             auto val = new_info.first;
             auto pos = new_info.second;
@@ -497,11 +516,23 @@ namespace ltj {
         /*bool is_at_end(){
             return at_end;
         }*/
+        bool at_level_of_var(var_type var){
+            if(m_vars_order[m_depth].is_variable && m_vars_order[m_depth].value == var){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        /**
+         * Seek_all must perform as many down() as necessary to be placed at 'var' level.
+         */
         std::vector<uint64_t> seek_all(var_type var){
 
             std::vector<uint64_t> results;
             bool finished = false;
-
+            while(!at_level_of_var(var)){
+                down(var, -1);
+            }
             if(!m_at_root){
                 while(!m_at_end && !finished){
                     if(results.size() >= index_scheme::util::configuration.get_number_of_results()){
@@ -535,6 +566,21 @@ namespace ltj {
         void restart_level_iterator(const var_type x_j, size_type c = -1){
             up(x_j);
             down(x_j,c);
+        }
+
+        bool inline is_bound_subject_variable(){
+            return m_ptr_triple_pattern->term_s.is_variable &&
+                m_cur_s != -1UL;
+        }
+
+        bool inline is_bound_predicate_variable(){
+            return m_ptr_triple_pattern->term_p.is_variable &&
+                m_cur_p != -1UL;
+        }
+
+        bool inline is_bound_object_variable(){
+            return m_ptr_triple_pattern->term_o.is_variable &&
+                m_cur_o != -1UL;
         }
     };
 

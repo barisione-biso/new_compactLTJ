@@ -354,23 +354,6 @@ namespace ltj {
                         //4. Going up in the trie by removing x_j = c
                         itrs[0]->up(x_j);
                     }
-                    /*else{
-                        if(is_bound_subject_variable(itrs[0]) &&
-                        iter->get_triple_pattern()->term_s.value != x_j
-                        ){
-                            restart_iterator(itrs[0], x_j);
-                        }
-                        if(is_bound_predicate_variable(itrs[0]) &&
-                        iter->get_triple_pattern()->term_p.value != x_j
-                        ){
-                            restart_iterator(itrs[0], x_j);
-                        }
-                        if(is_bound_object_variable(iter) &&
-                        iter->get_triple_pattern()->term_o.value != x_j
-                        ){
-                            restart_iterator(itrs[0], x_j);
-                        }
-                    }*/
                 }else {
                     value_type c = seek(x_j, j);
                     std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
@@ -421,7 +404,7 @@ namespace ltj {
         /*
         Called within seek() before returning 0 when leap() finds no intersection.
         */
-        void check_restart_var_level_iterator(const var_type x_j,const size_type j, size_type c){
+        void check_restart_var_level_iterator(const var_type x_j,size_type c){
             for (auto& iter : m_var_to_iterators[x_j]){
                 bool restart_iter = true;
                 //TODO: improve this linear search.
@@ -468,7 +451,7 @@ namespace ltj {
                 //Compute leap for each triple that contains x_j
                 c_i = itrs[i]->leap(c);
                 if(c_i == 0){
-                    check_restart_var_level_iterator(x_j, j, c);
+                    check_restart_var_level_iterator(x_j, c);
                     return 0; //Empty intersection
                 }
                 n_ok = (c_i == c_prev) ? n_ok + 1 : 1;
