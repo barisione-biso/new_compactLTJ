@@ -449,7 +449,7 @@ namespace ltj {
                 m_at_end = false;
                 if(m_it==2){
                     m_at_root = true;
-                    // cout<<"subi hasta la root"<<endl;
+                    cout<<"subi hasta la root"<<endl;
                 }
                 else{
                     //m_prev_pos_in_parent = m_pos_in_parent;
@@ -516,8 +516,12 @@ namespace ltj {
         /*bool is_at_end(){
             return at_end;
         }*/
-        bool at_level_of_var(var_type var){
-            if(m_vars_order[m_depth].is_variable && m_vars_order[m_depth].value == var){
+        bool at_level_of_var(var_type x_j){
+            /*if(m_vars_order.size() <= 0){
+                //First variable corner case.
+                return true;
+            }*/
+            if(m_vars_order[m_depth].is_variable && m_vars_order[m_depth].value == x_j){
                 return true;
             }else{
                 return false;
@@ -526,12 +530,12 @@ namespace ltj {
         /**
          * Seek_all must perform as many down() as necessary to be placed at 'var' level.
          */
-        std::vector<uint64_t> seek_all(var_type var){
+        std::vector<uint64_t> seek_all(var_type x_j){
 
             std::vector<uint64_t> results;
             bool finished = false;
-            while(!at_level_of_var(var)){
-                down(var, -1);
+            while(!at_level_of_var(x_j)){
+                down(x_j, -1);
             }
             if(!m_at_root){
                 while(!m_at_end && !finished){
@@ -552,7 +556,7 @@ namespace ltj {
                 }
             }
             if(results.size()==0){
-                restart_level_iterator(var);
+                restart_level_iterator(x_j);
             }
             return results;
         }
