@@ -347,7 +347,7 @@ namespace ltj {
                         tuple[j] = {x_j, c};
                         //std::cout << "current var: " << int(std::get<0>(tuple[j])) << " = " << std::get<1>(tuple[j]) << std::endl;
                         //2. Going down in the trie by setting x_j = c (\mu(t_i) in paper)
-                        itrs[0]->down(x_j,c);//x_j, c
+                        itrs[0]->down(x_j);//x_j, c
                         //2. Search with the next variable x_{j+1}
                         ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
                         if(!ok) return false;
@@ -355,6 +355,32 @@ namespace ltj {
                         itrs[0]->up(x_j);
                     }
                 }else {
+                    /*value_type c = -1UL;
+                    while(c != 0){
+                        c = seek(x_j, j, c);
+                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        if(c != 0){
+                            tuple[j] = {x_j, c};
+                            for (ltj_iter_type* iter : itrs) {
+                                iter->down(x_j);
+                            }
+                            ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
+                            if(!ok) return false;
+                            for (ltj_iter_type *iter : itrs) {
+                                iter->up(x_j);
+                            }
+                            c = c + 1;
+                            //No up is required cause I need to keep working in the same level.
+                        }
+                    }*/
+                    //The problem is here I need to go up in the iterator that contains a bound variable
+                    //check_restart_var_level_iterator(x_j, c);
+                    /*
+                    for (ltj_iter_type *iter : itrs) {
+                        iter->up(x_j);
+                    }
+                    */
+                    
                     value_type c = seek(x_j, j);
                     std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
@@ -364,7 +390,7 @@ namespace ltj {
                         //std::cout << "current var: " << int(std::get<0>(tuple[j])) << " = " << std::get<1>(tuple[j]) << std::endl;
                         //2. Going down in the tries by setting x_j = c (\mu(t_i) in paper)
                         for (ltj_iter_type* iter : itrs) {
-                            iter->down(x_j, c);
+                            iter->down(x_j);
                         }
                         //3. Search with the next variable x_{j+1}
                         ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
@@ -372,9 +398,9 @@ namespace ltj {
                         //4. Going up in the tries by removing x_j = c
                         for (ltj_iter_type *iter : itrs) {
                             iter->up(x_j);
-                        }
+                        }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
-                        c = seek(x_j, j, c + 1);
+                        c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible. oops
                         std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
@@ -402,8 +428,7 @@ namespace ltj {
                 m_gao_vars[iter->get_triple_pattern()->term_o.value];
         }
         /*
-        Called within seek() before returning 0 when leap() finds no intersection.
-        */
+        Called within seek() before returning 0 when leap() finds no intersection. TODO: this should be a wrapper to another func in ltj_iterator.move to ltj_iterator.        */
         void check_restart_var_level_iterator(const var_type x_j,size_type c){
             for (auto& iter : m_var_to_iterators[x_j]){
                 bool restart_iter = true;
@@ -427,9 +452,12 @@ namespace ltj {
                 }
                 if(restart_iter){
                     iter->restart_level_iterator(x_j, c);
+                }else{
+                    iter->up(x_j);
                 }
             }
         }
+
         /*
         std::vector<uint64_t> seek_all(ltj_iter_type* iter,var_type x_j){
             return iter->seek_all(x_j);
@@ -447,14 +475,15 @@ namespace ltj {
         value_type seek(const var_type x_j, const size_type j, value_type c=-1){
             std::vector<ltj_iter_type*>& itrs = m_var_to_iterators[x_j];
             value_type c_i, c_prev = 0, i = 0, n_ok = 0;
-/*
+
             if(c!= -1){
                 for(auto& iter : itrs){
-                    if(iter->at_level_of_var(x_j)){
-                        iter->down(x_j, -1);
+                    if(!iter->at_level_of_var(x_j)){
+                        iter->down(x_j);
                     }
                 }
-            }*/
+            }
+
             while (true){
                 //Compute leap for each triple that contains x_j
                 c_i = itrs[i]->leap(c);

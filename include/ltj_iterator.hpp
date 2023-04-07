@@ -43,9 +43,9 @@ namespace ltj {
     private:
         const rdf::triple_pattern *m_ptr_triple_pattern;
         index_scheme_type *m_ptr_index; //TODO: should be const
-        value_type m_cur_s;
-        value_type m_cur_p;
-        value_type m_cur_o;
+        //value_type m_cur_s;
+        //value_type m_cur_p;
+        //value_type m_cur_o;
         bool m_is_empty = false;
         cltj::CTrie *m_trie;
         size_type m_number_of_constants;
@@ -68,9 +68,9 @@ namespace ltj {
         void copy(const ltj_iterator &o) {
             m_ptr_triple_pattern = o.m_ptr_triple_pattern;
             m_ptr_index = o.m_ptr_index;
-            m_cur_s = o.m_cur_s;
-            m_cur_p = o.m_cur_p;
-            m_cur_o = o.m_cur_o;
+            //m_cur_s = o.m_cur_s;
+            //m_cur_p = o.m_cur_p;
+            //m_cur_o = o.m_cur_o;
             m_number_of_constants = o.m_number_of_constants;
             m_is_empty = o.m_is_empty;
             m_trie = o.m_trie;
@@ -111,17 +111,17 @@ namespace ltj {
             return m_ptr_triple_pattern->term_o.is_variable && var == m_ptr_triple_pattern->term_o.value;
         }
         const bool &is_empty = m_is_empty;
-        const value_type &cur_s = m_cur_s;
-        const value_type &cur_p = m_cur_p;
-        const value_type &cur_o = m_cur_o;
+        //const value_type &cur_s = m_cur_s;
+        //const value_type &cur_p = m_cur_p;
+        //const value_type &cur_o = m_cur_o;
 
         ltj_iterator() = default;
         ltj_iterator(const rdf::triple_pattern *triple, var_type var, std::string var_order, index_scheme_type *index) {
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
-            m_cur_s = -1UL;
-            m_cur_p = -1UL;
-            m_cur_o = -1UL;
+            //m_cur_s = -1UL;
+            //m_cur_p = -1UL;
+            //m_cur_o = -1UL;
             m_var_owner = var;
             m_var_order = var_order;
             m_number_of_constants = 0;
@@ -133,23 +133,6 @@ namespace ltj {
             m_key_flag = false;
             std::string order = get_order();
             m_trie = m_ptr_index->get_trie(order);
-            /*
-            //TEST>>
-            auto aux = m_trie->find_seq_number(15322210);
-            uint32_t node = 0;
-            for ( uint32_t i=3; i < 153980665; i++){
-                auto aux = m_trie->key_at(i);
-                if(aux == 15322210){
-                    std::cout << i << std::endl;//R: 98393844, 98393845, 102631651, 102631652.
-                    node = i;
-                }
-            }
-            auto key = m_trie->key_at(node);//15322210.
-            auto parent_node = m_trie->parent(node);
-            auto post_in_parent = m_trie->getPosInParent(node);
-            auto child_rank = m_trie->childRank(node);
-            //TEST<<
-            */
             m_order.reserve(3);
             m_vars_order.reserve(3);
             //String to Vector
@@ -207,7 +190,6 @@ namespace ltj {
                             m_pos_in_parent = 1;
                             m_depth++;
                             //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                            m_cur_s = c;
                         }else{
                             m_is_empty = true;
                         }
@@ -229,7 +211,6 @@ namespace ltj {
                             m_pos_in_parent = 1;
                             m_depth++;
                             //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                            m_cur_p = c;
                         }else{
                             m_is_empty = true;
                         }
@@ -252,7 +233,6 @@ namespace ltj {
                             m_pos_in_parent = 1;
                             m_depth++;
                             //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                            m_cur_o = c;
                         }else{
                             m_is_empty = true;
                         }
@@ -319,9 +299,9 @@ namespace ltj {
             if (this != &o) {
                 m_ptr_triple_pattern = std::move(o.m_ptr_triple_pattern);
                 m_ptr_index = std::move(o.m_ptr_index);
-                m_cur_s = o.m_cur_s;
-                m_cur_p = o.m_cur_p;
-                m_cur_o = o.m_cur_o;
+                //m_cur_s = o.m_cur_s;
+                //m_cur_p = o.m_cur_p;
+                //m_cur_o = o.m_cur_o;
                 m_number_of_constants = o.m_number_of_constants;
                 m_is_empty = o.m_is_empty;
                 m_trie = o.m_trie;
@@ -343,9 +323,9 @@ namespace ltj {
             // m_bp.swap(bp_support.m_bp); use set_vector to set the supported bit_vector
             std::swap(m_ptr_triple_pattern, o.m_ptr_triple_pattern);
             std::swap(m_ptr_index, o.m_ptr_index);
-            std::swap(m_cur_s, o.m_cur_s);
-            std::swap(m_cur_p, o.m_cur_p);
-            std::swap(m_cur_o, o.m_cur_o);
+            //std::swap(m_cur_s, o.m_cur_s);
+            //std::swap(m_cur_p, o.m_cur_p);
+            //std::swap(m_cur_o, o.m_cur_o);
             std::swap(m_number_of_constants, o.m_number_of_constants);
             std::swap(m_is_empty, o.m_is_empty);
             std::swap(m_trie, o.m_trie);
@@ -367,13 +347,13 @@ namespace ltj {
         const size_type get_weight() const{
             return m_trie->childrenCount(m_parent_it);
         }
-        void down(var_type var, size_type c = -1UL){// Go down in the trie
+        void down(var_type var){// Go down in the trie
             if(m_at_root){
                 m_at_root = false;
             }
             //if(!m_at_end)
             if (is_variable_subject(var)) {
-                if (m_depth == 2){//m_cur_o != -1UL && m_cur_p != -1UL){
+                if (m_depth == 2){
                     //Do nothing
                     return;
                 }else{
@@ -387,11 +367,9 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
-                if(c != -1UL)
-                    m_cur_s = c;
             }
             if (is_variable_predicate(var)) {
-                if (m_depth == 2){//if (m_cur_s != -1UL && m_cur_o != -1UL){
+                if (m_depth == 2){
                     //Do nothing
                     return;
                 }else{
@@ -405,11 +383,9 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
-                if(c != -1UL)
-                    m_cur_p = c;
             }
             if (is_variable_object(var)) {
-                if (m_depth == 2){//if (m_cur_s != -1UL && m_cur_p != -1UL){
+                if (m_depth == 2){
                     //Do nothing
                     return;
                 }else{
@@ -423,33 +399,17 @@ namespace ltj {
                         //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
                     }
                 }
-                if(c != -1UL)
-                    m_cur_o = c;
             }
         };
         //Reverses the intervals and variable weights. Also resets the current value.
         void up(var_type var){ //Go up in the trie
             if(!m_at_root){
-                //uint64_t aux = -1UL;
-                if (is_variable_subject(var)) {
-                    //aux = m_cur_s;
-                    m_cur_s = -1UL;
-                }
-                if (is_variable_predicate(var)) {
-                    //aux = m_cur_p;
-                    m_cur_p = -1UL;
-                }
-                if (is_variable_object(var)) {
-                    //aux = m_cur_o;
-                    m_cur_o = -1UL;
-                }
-
                 m_depth--;
                 m_it = m_parent_it;
                 m_at_end = false;
                 if(m_it==2){
                     m_at_root = true;
-                    cout<<"subi hasta la root"<<endl;
+                    //cout<<"subi hasta la root"<<endl;
                 }
                 else{
                     //m_prev_pos_in_parent = m_pos_in_parent;
@@ -507,8 +467,7 @@ namespace ltj {
         };
 
         bool in_last_level(){
-            return (m_cur_o !=-1UL && m_cur_p != -1UL) || (m_cur_s !=-1UL && m_cur_p != -1UL)
-                    || (m_cur_o !=-1UL && m_cur_s != -1UL);
+            return m_depth == 2;
         }
         /*
             Returns true if the iterator is past the last child of a node
@@ -535,7 +494,7 @@ namespace ltj {
             std::vector<uint64_t> results;
             bool finished = false;
             while(!at_level_of_var(x_j)){
-                down(x_j, -1);
+                down(x_j);
             }
             if(!m_at_root){
                 while(!m_at_end && !finished){
@@ -569,9 +528,9 @@ namespace ltj {
         */
         void restart_level_iterator(const var_type x_j, size_type c = -1){
             up(x_j);
-            down(x_j,c);
+            down(x_j);
         }
-
+/*
         bool inline is_bound_subject_variable(){
             return m_ptr_triple_pattern->term_s.is_variable &&
                 m_cur_s != -1UL;
@@ -586,6 +545,7 @@ namespace ltj {
             return m_ptr_triple_pattern->term_o.is_variable &&
                 m_cur_o != -1UL;
         }
+*/
     };
 
 }
