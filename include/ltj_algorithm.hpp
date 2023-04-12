@@ -316,11 +316,11 @@ namespace ltj {
                     const size_type limit_results = 0, const size_type timeout_seconds = 0){
 
             //(Optional) Check timeout
-            if(timeout_seconds > 0){
+            /*if(timeout_seconds > 0){
                 time_point_type stop = std::chrono::high_resolution_clock::now();
                 size_type sec = std::chrono::duration_cast<std::chrono::seconds>(stop-start).count();
                 if(sec > timeout_seconds) return false;
-            }
+            }*/
 
             //(Optional) Check limit
             if(limit_results > 0 && res.size() == limit_results) return false;
@@ -382,7 +382,7 @@ namespace ltj {
                     */
                     
                     value_type c = seek(x_j, j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -400,8 +400,8 @@ namespace ltj {
                             iter->up(x_j);
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
-                        c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible. oops
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
@@ -436,17 +436,20 @@ namespace ltj {
                 //If in the triple referred by iterator 'iter' there is a bound variable in the subject that is not 'x_j'.
                 //We have to restart from from the first child of the parent node, which is accomplished with an up() followed by a down().
                 if(is_bound_subject_variable(iter) &&
-                iter->get_triple_pattern()->term_s.value != x_j
+                iter->get_triple_pattern()->term_s.value != x_j &&
+                iter->get_triple_pattern()->term_s.value != m_gao_size.get_starting_var() //If the other rel variable is the first one, do not go up.TODO: possible problem when 3 vars are in a triple? how to know the level? I guess if level is 0 do not go up. Get the level of the first variable.
                 ){
                     restart_iter = false;
                 }
                 if(is_bound_predicate_variable(iter) &&
-                iter->get_triple_pattern()->term_p.value != x_j
+                iter->get_triple_pattern()->term_p.value != x_j &&
+                iter->get_triple_pattern()->term_p.value != m_gao_size.get_starting_var() //If the other rel variable is the first one, do not go up.TODO: possible problem when 3 vars are in a triple? how to know the level? I guess if level is 0 do not go up. Get the level of the first variable.
                 ){
                     restart_iter = false;
                 }
                 if(is_bound_object_variable(iter) &&
-                iter->get_triple_pattern()->term_o.value != x_j
+                iter->get_triple_pattern()->term_o.value != x_j &&
+                iter->get_triple_pattern()->term_o.value != m_gao_size.get_starting_var() //If the other rel variable is the first one, do not go up.TODO: possible problem when 3 vars are in a triple? how to know the level? I guess if level is 0 do not go up. Get the level of the first variable.
                 ){
                     restart_iter = false;
                 }

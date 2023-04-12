@@ -352,39 +352,9 @@ namespace ltj {
                 m_at_root = false;
             }
             //if(!m_at_end)
-            if (is_variable_subject(var)) {
-                if (m_depth == 2){
-                    //Do nothing
-                    return;
-                }else{
-                    bool has_children = m_trie->childrenCount(m_it) != 0;
-                    if(has_children){
-                        m_parent_it = m_it;
-                        m_it = m_trie->child(m_it, 1);
-                        //m_prev_pos_in_parent = m_pos_in_parent;
-                        m_pos_in_parent = 1;
-                        m_depth++;
-                        //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                    }
-                }
-            }
-            if (is_variable_predicate(var)) {
-                if (m_depth == 2){
-                    //Do nothing
-                    return;
-                }else{
-                    bool has_children = m_trie->childrenCount(m_it) != 0;
-                    if(has_children){
-                        m_parent_it = m_it;
-                        m_it = m_trie->child(m_it, 1);
-                        //m_prev_pos_in_parent = m_pos_in_parent;
-                        m_pos_in_parent = 1;
-                        m_depth++;
-                        //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                    }
-                }
-            }
-            if (is_variable_object(var)) {
+            if (is_variable_subject(var) ||
+                is_variable_predicate(var) ||
+                is_variable_object(var)) {
                 if (m_depth == 2){
                     //Do nothing
                     return;
@@ -407,6 +377,12 @@ namespace ltj {
                 m_depth--;
                 m_it = m_parent_it;
                 m_at_end = false;
+                /*if(m_depth == -1UL){
+                    std::cout<< "here "<<std::endl;
+                }
+                if(m_it!=2 && m_depth == 0){
+                    std::cout<< "How can this be? "<<std::endl;
+                }*/
                 if(m_it==2){
                     m_at_root = true;
                     //cout<<"subi hasta la root"<<endl;
@@ -493,7 +469,8 @@ namespace ltj {
 
             std::vector<uint64_t> results;
             bool finished = false;
-            while(!at_level_of_var(x_j)){
+            if(!at_level_of_var(x_j)){
+            //while(!at_level_of_var(x_j)){
                 down(x_j);
             }
             if(!m_at_root){

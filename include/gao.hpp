@@ -356,6 +356,10 @@ namespace ltj {
             }
             m_previous_values_stack.pop();
         }
+
+        const var_type get_starting_var() const{
+            return m_starting_var;
+        }
     };
 
 }
