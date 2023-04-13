@@ -339,7 +339,10 @@ namespace ltj {
                 push_var_to_stack(x_j);
                 std::vector<ltj_iter_type*>& itrs = m_var_to_iterators[x_j];
                 bool ok;
-                if(itrs.size() == 1 && itrs[0]->in_last_level()) {//Lonely variables
+                if(itrs.size() == 1) {//Lonely variables
+                    if(!itrs[0]->in_last_level()){
+                        itrs[0]->down(x_j);
+                    }
                     auto results = itrs[0]->seek_all(x_j);
                     //std::cout << "Results: " << results.size() << std::endl;
                     for (const auto &c : results) {
@@ -355,32 +358,7 @@ namespace ltj {
                         itrs[0]->up(x_j);
                     }
                 }else {
-                    /*value_type c = -1UL;
-                    while(c != 0){
-                        c = seek(x_j, j, c);
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
-                        if(c != 0){
-                            tuple[j] = {x_j, c};
-                            for (ltj_iter_type* iter : itrs) {
-                                iter->down(x_j);
-                            }
-                            ok = search(j + 1, tuple, res, start, limit_results, timeout_seconds);
-                            if(!ok) return false;
-                            for (ltj_iter_type *iter : itrs) {
-                                iter->up(x_j);
-                            }
-                            c = c + 1;
-                            //No up is required cause I need to keep working in the same level.
-                        }
-                    }*/
-                    //The problem is here I need to go up in the iterator that contains a bound variable
-                    //check_restart_var_level_iterator(x_j, c);
-                    /*
-                    for (ltj_iter_type *iter : itrs) {
-                        iter->up(x_j);
-                    }
-                    */
-                    
+
                     value_type c = seek(x_j, j);
                     //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
