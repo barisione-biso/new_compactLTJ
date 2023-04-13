@@ -457,13 +457,13 @@ namespace ltj {
             std::vector<ltj_iter_type*>& itrs = m_var_to_iterators[x_j];
             value_type c_i, c_prev = 0, i = 0, n_ok = 0;
 
-            if(c!= -1){
+            //if(c!= -1){
                 for(auto& iter : itrs){
                     if(!iter->at_level_of_var(x_j)){
                         iter->down(x_j);
                     }
                 }
-            }
+            //}
 
             while (true){
                 //Compute leap for each triple that contains x_j
