@@ -48,6 +48,26 @@
             ]
         },
         {
+            "name": "FULL Query Index DIJKSTRA",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/query-index",
+            "args": ["/data/graphs/wikidata-whole-dump/wikidata.nt.enumerated-ltj-dan/",
+                    "Queries/Queries-bgps-limit1000.txt", "1000", "600"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "PYTHON (REMEMBER TO SELECT THE FILE to SET $FILE VAR)",
             "type": "python",
             "request": "launch",
