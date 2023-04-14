@@ -140,7 +140,10 @@ namespace ltj {
                 if(triple.s_is_variable()){
                     auto* iter = new ltj_iter_type(&triple, triple.term_s.value, "0", m_ptr_index);
                     //add_var_to_iterator(triple.term_s.value, &iter);//TODO: It seems is not necessary anymore.
-
+                    if(iter->is_empty){
+                        m_is_empty = true;
+                        return;
+                    }
                     s = true;
                     var_s = (var_type) triple.term_s.value;
                     auto weight = iter->get_weight();
