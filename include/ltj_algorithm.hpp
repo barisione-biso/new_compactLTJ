@@ -164,6 +164,10 @@ namespace ltj {
                     auto* iter = new ltj_iter_type(&triple, triple.term_p.value, "1", m_ptr_index);
                     //add_var_to_iterator(triple.term_p.value, &iter);//TODO: It seems is not necessary anymore.
 
+                    if(iter->is_empty){
+                        m_is_empty = true;
+                        return;
+                    }
                     p = true;
                     var_p = (var_type) triple.term_p.value;
                     auto weight = iter->get_weight();
@@ -184,6 +188,10 @@ namespace ltj {
                     auto* iter = new ltj_iter_type(&triple, triple.term_o.value, "2", m_ptr_index);//TODO: MemLeak
                     //add_var_to_iterator(triple.term_o.value, &iter);//TODO: It seems is not necessary anymore.
 
+                    if(iter->is_empty){
+                        m_is_empty = true;
+                        return;
+                    }
                     o = true;
                     var_o = triple.term_o.value;
                     auto weight = iter->get_weight();
