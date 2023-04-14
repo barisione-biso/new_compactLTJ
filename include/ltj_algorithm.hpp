@@ -338,13 +338,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                /*
+
                 std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
                 std::cout << " " << std::endl;
-                */
+
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -375,7 +375,7 @@ namespace ltj {
                 }else {
 
                     value_type c = seek(x_j, j);
-                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -394,7 +394,7 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
