@@ -351,6 +351,12 @@ namespace ltj {
             if(m_at_root){
                 m_at_root = false;
             }
+            //When there's only a triple, seek_all will always set m_at_end=true.
+            //Down needs to set it at false so the next variable can be eliminated properly.
+            //This was added to solve a problem of lonely variables when the BGP is composed of a single triple,
+            //meaning that all its vars are lonely, although only one of them is in the last level.
+            m_at_end = false;
+
             //if(!m_at_end)
             if (is_variable_subject(var) ||
                 is_variable_predicate(var) ||

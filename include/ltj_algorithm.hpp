@@ -327,11 +327,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                /*std::cout << "tuple : ";
+                /*
+                std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
-                std::cout << " " << std::endl;*/
+                std::cout << " " << std::endl;
+                */
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -339,10 +341,12 @@ namespace ltj {
                 push_var_to_stack(x_j);
                 std::vector<ltj_iter_type*>& itrs = m_var_to_iterators[x_j];
                 bool ok;
-                if(itrs.size() == 1) {//Lonely variables
-                    if(!itrs[0]->in_last_level()){
-                        itrs[0]->down(x_j);
-                    }
+                //The second case means when there's only a triple, all vars are lonely (Some of them are not in the last level though). Therefore we dont need to do an extra down.
+                if(itrs.size() == 1 && !itrs[0]->in_last_level() && m_ptr_triple_patterns->size() > 1){
+                    itrs[0]->down(x_j);
+                }
+                if(itrs.size() == 1 && itrs[0]->in_last_level()) {//Lonely variables in the last level.
+
                     auto results = itrs[0]->seek_all(x_j);
                     //std::cout << "Results: " << results.size() << std::endl;
                     for (const auto &c : results) {
