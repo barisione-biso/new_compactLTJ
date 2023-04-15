@@ -60,6 +60,7 @@ namespace ltj {
             size_type weight;
             size_type n_triples;
             std::unordered_set<var_type> related;
+            std::vector<size_type> triple_ids;//Stores a list of k triples_{x_j} to do a linear search over them and not against all triples.
             std::vector<triple_iter_related_type> triple_iter_related_details;
         } info_var_type;
     private:
@@ -153,6 +154,7 @@ namespace ltj {
                     triple_iter_related.triple_number = i;
                     triple_iter_related.iterator = iter;
                     triple_iter_related.empty = false;
+                    m_var_info[m_hash_table_position[var_s]].triple_ids.push_back(i);
                     if(triple.p_is_variable()){
                         triple_iter_related.related.insert((var_type) triple.term_p.value);
                     }
@@ -177,6 +179,7 @@ namespace ltj {
                     triple_iter_related.triple_number = i;
                     triple_iter_related.iterator = iter;
                     triple_iter_related.empty = false;
+                    m_var_info[m_hash_table_position[var_p]].triple_ids.push_back(i);
                     if(triple.s_is_variable()){
                         triple_iter_related.related.insert((var_type) triple.term_s.value);
                     }
@@ -201,6 +204,7 @@ namespace ltj {
                     triple_iter_related.triple_number = i;
                     triple_iter_related.iterator = iter;
                     triple_iter_related.empty = false;
+                    m_var_info[m_hash_table_position[var_o]].triple_ids.push_back(i);
                     if(triple.s_is_variable()){
                         triple_iter_related.related.insert((var_type) triple.term_s.value);
                     }
@@ -295,6 +299,7 @@ namespace ltj {
                 var_type var = '\0';
                 const var_type& cur_var = m_gao_stack.top();
                 const std::unordered_map<var_type, bool> & b_vars = m_gao_vars;
+                //refresh rel var iterators?
                 m_gao_size.update_weights(j, cur_var, b_vars, m_var_to_iterators);
                 var = m_gao_size.get_next_var(j, m_gao_vars);
                 return var;
@@ -310,6 +315,7 @@ namespace ltj {
 
         void pop_var_of_stack(){
             auto v = m_gao_stack.top();
+            //clean ref to iters.
             m_gao_stack.pop();
             m_gao_vars[v]=false;
         }
