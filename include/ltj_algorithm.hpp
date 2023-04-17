@@ -87,6 +87,12 @@ namespace ltj {
             m_var_info = o.m_var_info;
             m_hash_table_position = o.m_hash_table_position;
         }
+        info_var_type& get_var_info(var_type x_j) {
+            return m_var_info[m_hash_table_position[x_j]];
+        }
+        bool is_var_lonely(var_type x_j){
+            return get_var_info(x_j).n_triples == 1;
+        }
     public:
 
 
@@ -150,11 +156,11 @@ namespace ltj {
                     auto weight = iter->get_weight();
                     var_to_vector(var_s, weight, number_of_triples, m_hash_table_position, m_var_info);
 
-                    auto& triple_iter_related = m_var_info[m_hash_table_position[var_s]].triple_iter_related_details[i];
+                    auto& triple_iter_related = get_var_info(var_s).triple_iter_related_details[i];
                     triple_iter_related.triple_number = i;
                     triple_iter_related.iterator = iter;
                     triple_iter_related.empty = false;
-                    m_var_info[m_hash_table_position[var_s]].triple_ids.push_back(i);
+                    get_var_info(var_s).triple_ids.push_back(i);
                     if(triple.p_is_variable()){
                         triple_iter_related.related.insert((var_type) triple.term_p.value);
                     }
@@ -175,11 +181,11 @@ namespace ltj {
                     auto weight = iter->get_weight();
                     var_to_vector(var_p, weight, number_of_triples, m_hash_table_position, m_var_info);
 
-                    auto& triple_iter_related = m_var_info[m_hash_table_position[var_p]].triple_iter_related_details[i];
+                    auto& triple_iter_related = get_var_info(var_p).triple_iter_related_details[i];
                     triple_iter_related.triple_number = i;
                     triple_iter_related.iterator = iter;
                     triple_iter_related.empty = false;
-                    m_var_info[m_hash_table_position[var_p]].triple_ids.push_back(i);
+                    get_var_info(var_p).triple_ids.push_back(i);
                     if(triple.s_is_variable()){
                         triple_iter_related.related.insert((var_type) triple.term_s.value);
                     }
@@ -200,11 +206,11 @@ namespace ltj {
                     auto weight = iter->get_weight();
                     var_to_vector(var_o, weight, number_of_triples, m_hash_table_position, m_var_info);
 
-                    auto& triple_iter_related = m_var_info[m_hash_table_position[var_o]].triple_iter_related_details[i];
+                    auto& triple_iter_related = get_var_info(var_o).triple_iter_related_details[i];
                     triple_iter_related.triple_number = i;
                     triple_iter_related.iterator = iter;
                     triple_iter_related.empty = false;
-                    m_var_info[m_hash_table_position[var_o]].triple_ids.push_back(i);
+                    get_var_info(var_o).triple_ids.push_back(i);
                     if(triple.s_is_variable()){
                         triple_iter_related.related.insert((var_type) triple.term_s.value);
                     }
