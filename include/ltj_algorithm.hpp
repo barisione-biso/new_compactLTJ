@@ -42,26 +42,29 @@ namespace ltj {
         typedef index_scheme_t index_scheme_type;
         typedef cons_t const_type;
         typedef ltj_iterator_t ltj_iter_type;
+        typedef std::string order_type;
         typedef std::unordered_map<var_type, std::vector<ltj_iter_type*>> var_to_iterators_type;
         typedef std::vector<std::pair<var_type, value_type>> tuple_type;
         typedef std::chrono::high_resolution_clock::time_point time_point_type;
+        typedef std::vector<order_type> orders_type;
+        typedef std::unordered_map<var_type, orders_type> var_to_orders_type;
+        typedef std::unordered_map<order_type,ltj_iter_type*> orders_to_iterators_type;
 
         typedef std::pair<size_type, var_type> pair_type;
         typedef std::priority_queue<pair_type, std::vector<pair_type>, std::greater<pair_type>> min_heap_type;
 
         typedef struct {
-            size_type triple_number;
-            ltj_iter_type* iterator;
+            orders_to_iterators_type order_to_iterators;
             std::unordered_set<var_type> related;
             bool empty = true;
-        } triple_iter_related_type;
+        } triple_info_type;
         typedef struct {
             var_type name;
             size_type weight;
             size_type n_triples;
             std::unordered_set<var_type> related;
-            std::vector<size_type> triple_ids;//Stores a list of k triples_{x_j} to do a linear search over them and not against all triples.
-            std::vector<triple_iter_related_type> triple_iter_related_details;
+            //std::vector<size_type> triple_ids;//Stores a list of k triples_{x_j} to do a linear search over them and not against all triples.
+            std::unordered_map<size_type, triple_info_type> triples;
         } info_var_type;
     private:
         std::vector<info_var_type> m_var_info;
@@ -77,6 +80,7 @@ namespace ltj {
         var_to_iterators_type m_var_to_iterators;
         bool m_is_empty = false;
         gao_size<info_var_type, var_to_iterators_type, index_scheme_type> m_gao_size;
+        std::unordered_map<var_type, size_type> m_var_to_n_triples;
         void copy(const ltj_algorithm &o) {
             m_ptr_triple_patterns = o.m_ptr_triple_patterns;
             m_gao = o.m_gao;
@@ -90,8 +94,17 @@ namespace ltj {
         info_var_type& get_var_info(var_type x_j) {
             return m_var_info[m_hash_table_position[x_j]];
         }
+        triple_info_type& get_triple_info(var_type x_j, size_type triple_index){
+            return get_var_info(x_j).triples[triple_index];
+        }
+        orders_to_iterators_type get_var_triple_iterators_per_order(var_type x_j, size_type triple_index){
+            return get_triple_info(x_j, triple_index).order_to_iterators;
+        }
         bool is_var_lonely(var_type x_j){
-            return get_var_info(x_j).n_triples == 1;
+            if(m_var_to_n_triples.find(x_j) != m_var_to_n_triples.end()){
+                return  m_var_to_n_triples[x_j] == 1 ? true : false;
+            }
+            return false;
         }
     public:
 
@@ -108,7 +121,7 @@ namespace ltj {
             vec[pos_rel].related.insert(var);
         }
         //TODO: move to another function / class that manages the variable information.
-        void var_to_vector(const var_type var, const size_type weight, uint64_t num_of_triples,
+        void var_to_vector(const var_type var, const size_type weight,
                             std::unordered_map<var_type, size_type> &hash_table,
                             std::vector<info_var_type> &vec){
 
@@ -117,18 +130,144 @@ namespace ltj {
                 info_var_type info;
                 info.name = var;
                 info.weight = weight;
-                info.n_triples = 1;
-                info.triple_iter_related_details.reserve(num_of_triples);
-                for(uint64_t i = 0 ; i < num_of_triples; i++){
-                    info.triple_iter_related_details.emplace_back();
-                }
                 vec.emplace_back(info);
                 hash_table.insert({var, vec.size()-1});
             }else{
                 info_var_type& info = vec[it->second];
-                ++info.n_triples;
                 if(info.weight > weight){
                     info.weight = weight;
+                }
+            }
+        }
+        var_to_orders_type get_orders(const rdf::triple_pattern& triple){
+            var_to_orders_type var_to_orders;
+            size_type number_of_variables = 0;
+            std::stringstream order_aux;
+            //First count variables and setup the constants.
+            if(triple.s_is_variable()){
+                number_of_variables++;
+            }else{
+                order_aux<<"0 ";
+            }
+            if(triple.p_is_variable()){
+                number_of_variables++;
+            }else{
+                order_aux<<"1 ";
+            }
+            if(triple.o_is_variable()){
+                number_of_variables++;
+            }else{
+                order_aux<<"2 ";
+            }
+            //Then evaluate case by case, 1 var, 2 vars and 3 vars.
+            if(number_of_variables == 1){
+                //1 iterator
+                var_type var = '\0';
+                if(triple.s_is_variable()){
+                    order_aux<<"0 ";
+                    var = triple.term_s.value;
+                }
+                if(triple.p_is_variable()){
+                    order_aux<<"1 ";
+                    var = triple.term_p.value;
+                }
+                if(triple.o_is_variable()){
+                    order_aux<<"2 ";
+                    var = triple.term_o.value;
+                }
+
+                std::string str = order_aux.str();
+                index_scheme::util::rtrim(str);
+                var_to_orders[var].emplace_back(str);
+            }
+            if(number_of_variables >= 2){
+                std::vector<var_type> variables;
+                std::vector<var_type> lonely_variables;
+                std::stringstream order_lonely_vars;
+                //2 non-lonely variables yield 2 iterators.
+                //3 non-lonely variables yield 6 iterators.
+                if(triple.s_is_variable()){
+                    if(!is_var_lonely(triple.term_s.value)){
+                        variables.emplace_back(triple.term_s.value);
+                    }else{
+                        lonely_variables.emplace_back(triple.term_s.value);
+                        order_lonely_vars << "0 ";
+                    }
+                }
+                if(triple.p_is_variable()){
+                    if(!is_var_lonely(triple.term_p.value)){
+                        variables.emplace_back(triple.term_p.value);
+                    }else{
+                        lonely_variables.emplace_back(triple.term_p.value);
+                        order_lonely_vars << "1 ";
+                    }
+                }
+                if(triple.o_is_variable()){
+                    if(!is_var_lonely(triple.term_o.value)){
+                        variables.emplace_back(triple.term_o.value);
+                    }else{
+                        lonely_variables.emplace_back(triple.term_o.value);
+                        order_lonely_vars << "2 ";
+                    }
+                }
+                //get all permutations
+                std::sort(variables.begin(), variables.end());
+                do{
+                    size_type owner_var = -1UL;
+                    std::stringstream order_vars;
+                    for(var_type& var: variables){
+                        if((var_type) triple.term_s.value == var){
+                            order_vars<<"0 ";
+                            if(owner_var == -1UL){
+                                owner_var = triple.term_s.value;
+                            }
+                        }
+                        if((var_type) triple.term_p.value == var){
+                            order_vars<<"1 ";
+                            if(owner_var == -1UL){
+                                owner_var = triple.term_p.value;
+                            }
+                        }
+                        if((var_type) triple.term_o.value == var){
+                            order_vars<<"2 ";
+                            if(owner_var == -1UL){
+                                owner_var = triple.term_o.value;
+                            }
+                        }
+                    }
+
+                    std::string str = order_aux.str() + order_vars.str() + order_lonely_vars.str();
+                    index_scheme::util::rtrim(str);
+                    var_to_orders[(var_type) owner_var].emplace_back(str);
+                    for(auto& lonely_variable : lonely_variables){
+                        var_to_orders[(var_type) lonely_variable].emplace_back(str);
+                    }
+
+                }while(std::next_permutation(variables.begin(), variables.end()));
+            }
+
+            return var_to_orders;//Case 0 vars: returns an empty vector.
+        }
+        void create_iterators(var_type x_j, const rdf::triple_pattern& triple, size_type triple_index, const orders_type& orders){
+            if(orders.size() == 0){
+                m_is_empty = true;
+                return;
+            }else{
+                for(auto& order : orders){
+                    auto* iter = new ltj_iter_type(&triple, x_j, order, m_ptr_index);
+                    if(iter->is_empty){
+                        m_is_empty = true;
+                    }
+                    auto weight = iter->get_weight();
+                    std::cout << "New iter for " << (size_type) x_j << " with order " << order << " and weight " << weight << std::endl;
+                    var_to_vector(x_j, weight, m_hash_table_position, m_var_info);
+                    //>> Ordenar
+                    auto& triples = get_var_info(x_j).triples;
+                    auto& triple = triples[triple_index];
+                    auto& order_to_iterators = triple.order_to_iterators;
+                    order_to_iterators[order] = iter;
+                    get_triple_info(x_j, triple_index).empty = false;
+                    //<< Ordenar
                 }
             }
         }
@@ -136,86 +275,75 @@ namespace ltj {
         ltj_algorithm(const std::vector<rdf::triple_pattern>* triple_patterns, index_scheme_type* index){
 
             m_ptr_triple_patterns = triple_patterns;
-            uint64_t number_of_triples = m_ptr_triple_patterns->size();
+            size_type number_of_triples = m_ptr_triple_patterns->size();
             m_ptr_index = index;
             size_type i = 0;
             m_iterators.resize(m_ptr_triple_patterns->size());//TODO: get rid of it.
             //TODO: >> move to another function / class that manages the variable information.
+            //Count num of triples per variable.
             for(const auto& triple : *m_ptr_triple_patterns){
-                var_type var_s, var_p, var_o;
-                bool s = false, p = false, o = false;
                 if(triple.s_is_variable()){
-                    auto* iter = new ltj_iter_type(&triple, triple.term_s.value, "0", m_ptr_index);
-                    //add_var_to_iterator(triple.term_s.value, &iter);//TODO: It seems is not necessary anymore.
-                    if(iter->is_empty){
-                        m_is_empty = true;
-                        return;
-                    }
-                    s = true;
-                    var_s = (var_type) triple.term_s.value;
-                    auto weight = iter->get_weight();
-                    var_to_vector(var_s, weight, number_of_triples, m_hash_table_position, m_var_info);
-
-                    auto& triple_iter_related = get_var_info(var_s).triple_iter_related_details[i];
-                    triple_iter_related.triple_number = i;
-                    triple_iter_related.iterator = iter;
-                    triple_iter_related.empty = false;
-                    get_var_info(var_s).triple_ids.push_back(i);
-                    if(triple.p_is_variable()){
-                        triple_iter_related.related.insert((var_type) triple.term_p.value);
-                    }
-                    if(triple.o_is_variable()){
-                        triple_iter_related.related.insert((var_type) triple.term_o.value);
+                    var_type var = (var_type) triple.term_s.value;
+                    if(m_var_to_n_triples.find(var) == m_var_to_n_triples.end()){
+                        m_var_to_n_triples[var] = 1;
+                    }else{
+                        m_var_to_n_triples[var] = m_var_to_n_triples[var] + 1;
                     }
                 }
                 if(triple.p_is_variable()){
-                    auto* iter = new ltj_iter_type(&triple, triple.term_p.value, "1", m_ptr_index);
-                    //add_var_to_iterator(triple.term_p.value, &iter);//TODO: It seems is not necessary anymore.
-
-                    if(iter->is_empty){
-                        m_is_empty = true;
-                        return;
-                    }
-                    p = true;
-                    var_p = (var_type) triple.term_p.value;
-                    auto weight = iter->get_weight();
-                    var_to_vector(var_p, weight, number_of_triples, m_hash_table_position, m_var_info);
-
-                    auto& triple_iter_related = get_var_info(var_p).triple_iter_related_details[i];
-                    triple_iter_related.triple_number = i;
-                    triple_iter_related.iterator = iter;
-                    triple_iter_related.empty = false;
-                    get_var_info(var_p).triple_ids.push_back(i);
-                    if(triple.s_is_variable()){
-                        triple_iter_related.related.insert((var_type) triple.term_s.value);
-                    }
-                    if(triple.o_is_variable()){
-                        triple_iter_related.related.insert((var_type) triple.term_o.value);
+                    var_type var = (var_type) triple.term_p.value;
+                    if(m_var_to_n_triples.find(var) == m_var_to_n_triples.end()){
+                        m_var_to_n_triples[var] = 1;
+                    }else{
+                        m_var_to_n_triples[var] = m_var_to_n_triples[var] + 1;
                     }
                 }
                 if(triple.o_is_variable()){
-                    auto* iter = new ltj_iter_type(&triple, triple.term_o.value, "2", m_ptr_index);//TODO: MemLeak
-                    //add_var_to_iterator(triple.term_o.value, &iter);//TODO: It seems is not necessary anymore.
-
-                    if(iter->is_empty){
-                        m_is_empty = true;
-                        return;
+                    var_type var = (var_type) triple.term_o.value;
+                    if(m_var_to_n_triples.find(var) == m_var_to_n_triples.end()){
+                        m_var_to_n_triples[var] = 1;
+                    }else{
+                        m_var_to_n_triples[var] = m_var_to_n_triples[var] + 1;
                     }
-                    o = true;
-                    var_o = triple.term_o.value;
-                    auto weight = iter->get_weight();
-                    var_to_vector(var_o, weight, number_of_triples, m_hash_table_position, m_var_info);
-
-                    auto& triple_iter_related = get_var_info(var_o).triple_iter_related_details[i];
-                    triple_iter_related.triple_number = i;
-                    triple_iter_related.iterator = iter;
-                    triple_iter_related.empty = false;
-                    get_var_info(var_o).triple_ids.push_back(i);
+                }
+            }
+            for(const auto& triple : *m_ptr_triple_patterns){
+                var_type var_s, var_p, var_o;
+                bool s = false, p = false, o = false;
+                var_to_orders_type var_to_orders;
+                var_to_orders = get_orders(triple);//TODO: try to use a const-ref.
+                if(triple.s_is_variable()){
+                    var_s = (var_type) triple.term_s.value;
+                    auto& orders = var_to_orders[var_s];
+                    create_iterators(var_s, triple, i, orders);
+                    s = true;
+                    if(triple.p_is_variable()){
+                        get_triple_info(var_s, i).related.insert((var_type) triple.term_p.value);
+                    }
+                    if(triple.o_is_variable()){
+                        get_triple_info(var_s, i).related.insert((var_type) triple.term_o.value);
+                    }
+                }
+                if(triple.p_is_variable()){
+                    var_p = (var_type) triple.term_p.value;
+                    create_iterators(var_p, triple, i, var_to_orders[var_p]);
+                    p = true;
                     if(triple.s_is_variable()){
-                        triple_iter_related.related.insert((var_type) triple.term_s.value);
+                        get_triple_info(var_p, i).related.insert((var_type) triple.term_s.value);
+                    }
+                    if(triple.o_is_variable()){
+                        get_triple_info(var_p, i).related.insert((var_type) triple.term_o.value);
+                    }
+                }
+                if(triple.o_is_variable()){
+                    var_o = (var_type) triple.term_o.value;
+                    create_iterators(var_o, triple, i, var_to_orders[var_o]);
+                    o = true;
+                    if(triple.s_is_variable()){
+                        get_triple_info(var_o, i).related.insert((var_type) triple.term_s.value);
                     }
                     if(triple.p_is_variable()){
-                        triple_iter_related.related.insert((var_type) triple.term_p.value);
+                        get_triple_info(var_o, i).related.insert((var_type) triple.term_p.value);
                     }
                 }
                 if(s && p){
@@ -229,6 +357,10 @@ namespace ltj {
                 }
                 ++i;
                 //TODO: << move to another function / class that manages the variable information.
+            }
+            //Improve the following code, unify.
+            for(auto& var_info : m_var_info){
+                var_info.n_triples = m_var_to_n_triples[var_info.name];
             }
             m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, &m_var_to_iterators, m_ptr_index, m_gao);
             m_gao_vars.reserve(m_gao_size.number_of_variables);

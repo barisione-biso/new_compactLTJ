@@ -186,7 +186,7 @@ namespace ltj {
             }
             //3. Up to here the gao is calculated. Now we need to set the iterators per variable,
             // based on the idea of 1 iterator per triple (For LTJ usage).
-
+/*
             //We want to know per each v in gao and t in Q_{v}. Was t checked before? if no, check it, otherwise omit it.
             std::vector<bool> checked(m_number_of_triples, false);
             for(auto& var: gao){
@@ -194,17 +194,17 @@ namespace ltj {
                 auto& triple_iter_related = m_var_info[m_hash_table_position[var]].triple_iter_related_details;
                 //per each triple t in Q_{v}, where Q_{v} are triple patterns in which v participates (!t.empty).
                 for(auto& t : triple_iter_related){
-                    if(!t.empty && !checked[t.triple_number]){
+                    if(!t.empty && !checked[t.triple_index]){
                         auto& winning_iter = t.iterator;
                         add_var_to_iterator(var, winning_iter);
-                        checked[t.triple_number] = true;
+                        checked[t.triple_index] = true;
                         for(auto& rel_var : t.related){//related variables in t.
                             add_var_to_iterator(rel_var, winning_iter);
                         }
 
                     }
                 }
-            }
+            }*/
             //std::cout << "done."<< std::endl;
         }
 

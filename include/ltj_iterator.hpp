@@ -131,12 +131,11 @@ namespace ltj {
             m_at_end = false;
             m_depth = -1;
             m_key_flag = false;
-            std::string order = get_order();
-            m_trie = m_ptr_index->get_trie(order);
+            m_trie = m_ptr_index->get_trie(m_var_order);
             m_order.reserve(3);
-            m_vars_order.reserve(3);
+            m_vars_order.reserve(3);//legacy member
             //String to Vector
-            std::stringstream ss(order);
+            std::stringstream ss(m_var_order);
             std::istream_iterator<std::string> begin(ss);
             std::istream_iterator<std::string> end;
             std::vector<std::string> vstrings(begin, end);
@@ -167,7 +166,6 @@ namespace ltj {
             }else{
                 m_is_empty = true;
             }
-            //TODO: Importante, marcar m_is_empty = true si corresponde!
         }
         void process_constants(){
             size_type c = -1;
