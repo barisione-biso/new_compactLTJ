@@ -173,7 +173,8 @@ namespace ltj {
                 if(m_is_empty)
                     break;
                 if (o == 0){
-                    if(!m_ptr_triple_pattern->term_s.is_variable){
+                    if(!m_ptr_triple_pattern->s_is_variable()){
+                        m_number_of_constants++;
                         c = leap(m_ptr_triple_pattern->term_s.value);
                         if(c != m_ptr_triple_pattern->term_s.value){
                             m_is_empty = true;
@@ -191,10 +192,10 @@ namespace ltj {
                         }else{
                             m_is_empty = true;
                         }
-                        m_number_of_constants++;
                     }
                 } else if(o == 1){
-                    if(!m_ptr_triple_pattern->term_p.is_variable){
+                    if(!m_ptr_triple_pattern->p_is_variable()){
+                        m_number_of_constants++;
                         c = leap(m_ptr_triple_pattern->term_p.value);
                         if(c != m_ptr_triple_pattern->term_p.value){
                             m_is_empty = true;
@@ -212,11 +213,10 @@ namespace ltj {
                         }else{
                             m_is_empty = true;
                         }
-
-                        m_number_of_constants++;
                     }
                 } else {
-                    if(!m_ptr_triple_pattern->term_o.is_variable){
+                    if(!m_ptr_triple_pattern->o_is_variable()){
+                        m_number_of_constants++;
                         c = leap(m_ptr_triple_pattern->term_o.value);
                         if(c != m_ptr_triple_pattern->term_o.value){
                             m_is_empty = true;
@@ -343,7 +343,11 @@ namespace ltj {
             return m_trie->childrenCount(m_it);
         }
         const size_type get_weight() const{
-            return m_trie->childrenCount(m_parent_it);
+            if(m_number_of_constants == 0){
+                return -1UL; //Border Case, when there are no constants all the weight have to be the maximum value or the number of triples in the BGP (which is what the Ring does).
+            }else{
+                return m_trie->childrenCount(m_parent_it);
+            }
         }
         void down(var_type var){// Go down in the trie
             if(m_at_root){

@@ -238,7 +238,9 @@ namespace ltj {
 
                     std::string str = order_aux.str() + order_vars.str() + order_lonely_vars.str();
                     index_scheme::util::rtrim(str);
-                    var_to_orders[(var_type) owner_var].emplace_back(str);
+                    if(owner_var != -1UL){
+                        var_to_orders[(var_type) owner_var].emplace_back(str);
+                    }
                     for(auto& lonely_variable : lonely_variables){
                         var_to_orders[(var_type) lonely_variable].emplace_back(str);
                     }
@@ -259,7 +261,7 @@ namespace ltj {
                         m_is_empty = true;
                     }
                     auto weight = iter->get_weight();
-                    std::cout << "New iter for " << (size_type) x_j << " with order " << order << " and weight " << weight << std::endl;
+                    //std::cout << "New iter for " << (size_type) x_j << " with order " << order << " and weight " << weight << std::endl;
                     var_to_vector(x_j, weight, m_hash_table_position, m_var_info);
                     //>> Ordenar
                     auto& triples = get_var_info(x_j).triples;
