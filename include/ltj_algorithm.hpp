@@ -49,7 +49,7 @@ namespace ltj {
         typedef std::vector<order_type> orders_type;
         typedef std::unordered_map<var_type, orders_type> var_to_orders_type;
         typedef std::unordered_map<order_type,ltj_iter_type*> orders_to_iterators_type;
-
+        typedef std::vector<orders_to_iterators_type> bgp_triple_iters;
         typedef std::pair<size_type, var_type> pair_type;
         typedef std::priority_queue<pair_type, std::vector<pair_type>, std::greater<pair_type>> min_heap_type;
 
@@ -68,6 +68,7 @@ namespace ltj {
         } info_var_type;
     private:
         std::vector<info_var_type> m_var_info;
+        bgp_triple_iters m_triple_iters;
         std::unordered_map<var_type, size_type> m_hash_table_position;
         const std::vector<rdf::triple_pattern>* m_ptr_triple_patterns;
         std::vector<var_type> m_gao; //TODO: should be a class
@@ -76,7 +77,6 @@ namespace ltj {
         //m_gao_vars is a 1:1 umap representation the m_gao_stack, everything in m_gao_stack is true in this structure.
         std::unordered_map<var_type, bool> m_gao_vars;
         //gao_type m_gao_test;
-        std::vector<ltj_iter_type> m_iterators;
         var_to_iterators_type m_var_to_iterators;
         bool m_is_empty = false;
         gao_size<info_var_type, var_to_iterators_type, index_scheme_type> m_gao_size;
@@ -85,7 +85,6 @@ namespace ltj {
             m_ptr_triple_patterns = o.m_ptr_triple_patterns;
             m_gao = o.m_gao;
             m_ptr_index = o.m_ptr_index;
-            m_iterators = o.m_iterators;
             m_var_to_iterators = o.m_var_to_iterators;
             m_is_empty = o.m_is_empty;
             m_var_info = o.m_var_info;
@@ -216,19 +215,19 @@ namespace ltj {
                     size_type owner_var = -1UL;
                     std::stringstream order_vars;
                     for(var_type& var: variables){
-                        if((var_type) triple.term_s.value == var){
+                        if(triple.s_is_variable() && (var_type) triple.term_s.value == var){
                             order_vars<<"0 ";
                             if(owner_var == -1UL){
                                 owner_var = triple.term_s.value;
                             }
                         }
-                        if((var_type) triple.term_p.value == var){
+                        if(triple.p_is_variable() && (var_type) triple.term_p.value == var){
                             order_vars<<"1 ";
                             if(owner_var == -1UL){
                                 owner_var = triple.term_p.value;
                             }
                         }
-                        if((var_type) triple.term_o.value == var){
+                        if(triple.o_is_variable() && (var_type) triple.term_o.value == var){
                             order_vars<<"2 ";
                             if(owner_var == -1UL){
                                 owner_var = triple.term_o.value;
@@ -280,7 +279,6 @@ namespace ltj {
             size_type number_of_triples = m_ptr_triple_patterns->size();
             m_ptr_index = index;
             size_type i = 0;
-            m_iterators.resize(m_ptr_triple_patterns->size());//TODO: get rid of it.
             //TODO: >> move to another function / class that manages the variable information.
             //Count num of triples per variable.
             for(const auto& triple : *m_ptr_triple_patterns){
@@ -366,6 +364,14 @@ namespace ltj {
             }
             m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, &m_var_to_iterators, m_ptr_index, m_gao);
             m_gao_vars.reserve(m_gao_size.number_of_variables);
+
+            m_triple_iters.reserve(m_ptr_triple_patterns->size());
+            if(index_scheme::util::configuration.is_adaptive()){
+                //Go through all vars in GAO and assign iterators into m_var_to_iterators.
+                for(var_type& x_j : m_gao){
+                    nullptr;
+                }
+            }
         }
 
         //! Copy constructor
@@ -392,7 +398,6 @@ namespace ltj {
                 m_ptr_triple_patterns = std::move(o.m_ptr_triple_patterns);
                 m_gao = std::move(o.m_gao);
                 m_ptr_index = std::move(o.m_ptr_index);
-                m_iterators = std::move(o.m_iterators);
                 m_var_to_iterators = std::move(o.m_var_to_iterators);
                 m_is_empty = o.m_is_empty;
                 m_var_info = std::move(o.m_var_info);
@@ -405,7 +410,6 @@ namespace ltj {
             std::swap(m_ptr_triple_patterns, o.m_ptr_triple_patterns);
             std::swap(m_gao, o.m_gao);
             std::swap(m_ptr_index, o.m_ptr_index);
-            std::swap(m_iterators, o.m_iterators);
             std::swap(m_var_to_iterators, o.m_var_to_iterators);
             std::swap(m_is_empty, o.m_is_empty);
             std::swap(m_var_info, o.m_var_info);
