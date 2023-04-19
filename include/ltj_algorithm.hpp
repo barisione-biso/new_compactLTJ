@@ -186,28 +186,28 @@ namespace ltj {
                 //2 non-lonely variables yield 2 iterators.
                 //3 non-lonely variables yield 6 iterators.
                 if(triple.s_is_variable()){
-                    if(!is_var_lonely(triple.term_s.value)){
+                    //if(!is_var_lonely(triple.term_s.value)){
                         variables.emplace_back(triple.term_s.value);
-                    }else{
+                    /*}else{
                         lonely_variables.emplace_back(triple.term_s.value);
                         order_lonely_vars << "0 ";
-                    }
+                    }*/
                 }
                 if(triple.p_is_variable()){
-                    if(!is_var_lonely(triple.term_p.value)){
+                    //if(!is_var_lonely(triple.term_p.value)){
                         variables.emplace_back(triple.term_p.value);
-                    }else{
+                    /*}else{
                         lonely_variables.emplace_back(triple.term_p.value);
                         order_lonely_vars << "1 ";
-                    }
+                    }*/
                 }
                 if(triple.o_is_variable()){
-                    if(!is_var_lonely(triple.term_o.value)){
+                    //if(!is_var_lonely(triple.term_o.value)){
                         variables.emplace_back(triple.term_o.value);
-                    }else{
+                    /*}else{
                         lonely_variables.emplace_back(triple.term_o.value);
                         order_lonely_vars << "2 ";
-                    }
+                    }*/
                 }
                 //get all permutations
                 std::sort(variables.begin(), variables.end());
@@ -239,14 +239,21 @@ namespace ltj {
                     index_scheme::util::rtrim(str);
                     if(owner_var != -1UL){
                         var_to_orders[(var_type) owner_var].emplace_back(str);
-                    }
+                    }/*
                     for(auto& lonely_variable : lonely_variables){
                         var_to_orders[(var_type) lonely_variable].emplace_back(str);
-                    }
+                    }*/
 
                 }while(std::next_permutation(variables.begin(), variables.end()));
             }
-
+            /*if(var_to_orders.find('\000') != var_to_orders.end())
+                var_to_orders['\000'][0] = "1 0 2";
+            if(var_to_orders.find('\002') != var_to_orders.end())
+                var_to_orders['\002'][0] = "1 0 2";
+            if(var_to_orders.find('\003') != var_to_orders.end())
+                var_to_orders['\003'][0] = "1 2 0";
+            if(var_to_orders.find('\004') != var_to_orders.end())
+                var_to_orders['\004'][0] = "1 2 0";*/
             return var_to_orders;//Case 0 vars: returns an empty vector.
         }
         void create_iterators(var_type x_j, const rdf::triple_pattern& triple, size_type triple_index, const orders_type& orders){
