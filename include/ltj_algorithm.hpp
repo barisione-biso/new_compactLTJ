@@ -54,7 +54,7 @@ namespace ltj {
         typedef std::priority_queue<pair_type, std::vector<pair_type>, std::greater<pair_type>> min_heap_type;
 
         typedef struct {
-            orders_to_iterators_type order_to_iterators;
+            orders_to_iterators_type order_to_iterator;
             std::unordered_set<var_type> related;
             bool empty = true;
         } triple_info_type;
@@ -96,8 +96,12 @@ namespace ltj {
         triple_info_type& get_triple_info(var_type x_j, size_type triple_index){
             return get_var_info(x_j).triples[triple_index];
         }
-        orders_to_iterators_type get_var_triple_iterators_per_order(var_type x_j, size_type triple_index){
-            return get_triple_info(x_j, triple_index).order_to_iterators;
+        orders_to_iterators_type& get_var_iterators_by_triple(var_type x_j, size_type triple_index){
+            return get_triple_info(x_j, triple_index).order_to_iterator;
+        }
+
+        ltj_iter_type* get_var_iterator_by_triple_and_order(var_type x_j, size_type triple_index, order_type order){
+            return get_triple_info(x_j, triple_index).order_to_iterator[order];
         }
         bool is_var_lonely(var_type x_j){
             if(m_var_to_n_triples.find(x_j) != m_var_to_n_triples.end()){
@@ -142,6 +146,8 @@ namespace ltj {
             var_to_orders_type var_to_orders;
             size_type number_of_variables = 0;
             std::stringstream order_aux;
+            //This must be removed if we don't want to support it anymore.
+            //std::vector<var_type> all_vars_to_calculate_lonely_weight;
             //First count variables and setup the constants.
             if(triple.s_is_variable()){
                 number_of_variables++;
@@ -239,22 +245,126 @@ namespace ltj {
                     index_scheme::util::rtrim(str);
                     if(owner_var != -1UL){
                         var_to_orders[(var_type) owner_var].emplace_back(str);
-                    }/*
+                    }
                     for(auto& lonely_variable : lonely_variables){
                         var_to_orders[(var_type) lonely_variable].emplace_back(str);
-                    }*/
+                    }
 
                 }while(std::next_permutation(variables.begin(), variables.end()));
+                //>> special case to calculate Lonely vars weight as the ring does. Could be removed in the future.
+                //Tricky: The weight of the lonely vars must be calculated with them having precedence over all the other vars to match what the ring has.
+                /*std::sort(all_vars_to_calculate_lonely_weight.begin(), all_vars_to_calculate_lonely_weight.end());
+                do{
+                    size_type owner_var = -1UL;
+                    std::stringstream order_vars;
+                    for(var_type& var: all_vars_to_calculate_lonely_weight){
+                        if(triple.s_is_variable() && (var_type) triple.term_s.value == var){
+                            order_vars<<"0 ";
+                            if(owner_var == -1UL && is_var_lonely(triple.term_s.value)){
+                                owner_var = triple.term_s.value;
+                            }
+                        }
+                        if(triple.p_is_variable() && (var_type) triple.term_p.value == var){
+                            order_vars<<"1 ";
+                            if(owner_var == -1UL && is_var_lonely(triple.term_p.value)){
+                                owner_var = triple.term_p.value;
+                            }
+                        }
+                        if(triple.o_is_variable() && (var_type) triple.term_o.value == var){
+                            order_vars<<"2 ";
+                            if(owner_var == -1UL  && is_var_lonely(triple.term_o.value)){
+                                owner_var = triple.term_o.value;
+                            }
+                        }
+                    }
+
+                    std::string str = order_aux.str() + order_vars.str();
+                    index_scheme::util::rtrim(str);
+                    if(owner_var != -1UL){
+                        lonely_to_orders[(var_type) owner_var].emplace_back(str);
+                    }
+
+                }while(std::next_permutation(all_vars_to_calculate_lonely_weight.begin(), all_vars_to_calculate_lonely_weight.end()));
+                */
+                //<<
             }
-            /*if(var_to_orders.find('\000') != var_to_orders.end())
-                var_to_orders['\000'][0] = "1 0 2";
-            if(var_to_orders.find('\002') != var_to_orders.end())
-                var_to_orders['\002'][0] = "1 0 2";
-            if(var_to_orders.find('\003') != var_to_orders.end())
-                var_to_orders['\003'][0] = "1 2 0";
-            if(var_to_orders.find('\004') != var_to_orders.end())
-                var_to_orders['\004'][0] = "1 2 0";*/
             return var_to_orders;//Case 0 vars: returns an empty vector.
+        }
+        void categorize_var(var_type var, size_type i,
+                            std::unordered_map<var_type, std::vector<order_type>>& regular_var_to_orders,
+                            std::unordered_map<var_type, std::vector<order_type>>& lonely_var_to_orders,
+                            size_type& number_of_lonely){
+            triple_info_type& triple_info = get_triple_info(var, i);
+            if(is_var_lonely(var)){
+                number_of_lonely++;
+                for(auto& iter : triple_info.order_to_iterator){
+                    lonely_var_to_orders[var].emplace_back(iter.first);
+                }
+            }else{
+                for(auto& iter : triple_info.order_to_iterator){
+                    regular_var_to_orders[var].emplace_back(iter.first);
+                }
+            }
+        }
+        void refresh_lonely_var_iters(){
+            /*Up to this point we have calculated the weight of all variables using their iterators, even for the lonely ones.
+            Now we need to do the following:
+            per each triple t:
+                a. Separate vars into non-lonely and lonely vars and keep a reference to their iterators / orders.
+                then,
+                b. If there is 1 lonely:
+                    Delete the lonely var iterators_{t} and add a reference to the iterators of the non-lonely vars_{t}, either 1 or 2.
+                c. If there are 2 lonely:
+                    Delte their iterators_{t} and add a reference to the iterator of the non-lonely var_{t}
+                d. If there are 3 (or 0) lonely:
+                    Do nothing.
+            */
+            size_type i = 0;
+
+            for(const auto& triple : *m_ptr_triple_patterns){
+                std::unordered_map<var_type, std::vector<order_type>> regular_var_to_orders;
+                std::unordered_map<var_type, std::vector<order_type>> lonely_var_to_orders;//TODO: it is not required to be an umap. maybe just a vector?
+                size_type number_of_lonely = 0;
+                //a.
+                if(triple.s_is_variable()){
+                    var_type var = (var_type) triple.term_s.value;
+                    categorize_var(var, i, regular_var_to_orders, lonely_var_to_orders, number_of_lonely);
+                }
+                if(triple.p_is_variable()){
+                    var_type var = (var_type) triple.term_p.value;
+                    categorize_var(var, i, regular_var_to_orders, lonely_var_to_orders, number_of_lonely);
+                }
+                if(triple.o_is_variable()){
+                    var_type var = (var_type) triple.term_o.value;
+                    categorize_var(var, i, regular_var_to_orders, lonely_var_to_orders, number_of_lonely);
+                }
+
+                //d.
+                if(number_of_lonely == 0 || number_of_lonely == 3){
+                    return;
+                //a & b.
+                } else if(number_of_lonely == 1 || number_of_lonely == 2){
+                    for(auto& lonely_it : lonely_var_to_orders){
+                        var_type var = lonely_it.first;
+                        //Delete current iterators and clear the map.
+                        orders_to_iterators_type& iterator_per_order = get_var_iterators_by_triple(var, i);
+                        for(auto& it : iterator_per_order){
+                            //deleting ltj_iter_type* iter.
+                            delete it.second;//TODO: Check if it works or not.
+                        }
+                        iterator_per_order.clear();
+                        //Add a reference to the non-lonely var iterator(s).
+                        for(auto& var_to_orders : regular_var_to_orders){
+                            auto& regular_var = var_to_orders.first;
+                            auto& orders = var_to_orders.second;
+                            for(auto& order : orders){
+                                iterator_per_order[order] = get_var_iterator_by_triple_and_order(regular_var, i, order);
+                            }
+                        }
+                    }
+                }
+                i++;
+            }
         }
         void create_iterators(var_type x_j, const rdf::triple_pattern& triple, size_type triple_index, const orders_type& orders){
             if(orders.size() == 0){
@@ -272,8 +382,8 @@ namespace ltj {
                     //>> Ordenar
                     auto& triples = get_var_info(x_j).triples;
                     auto& triple = triples[triple_index];
-                    auto& order_to_iterators = triple.order_to_iterators;
-                    order_to_iterators[order] = iter;
+                    auto& order_to_iterator = triple.order_to_iterator;
+                    order_to_iterator[order] = iter;
                     get_triple_info(x_j, triple_index).empty = false;
                     //<< Ordenar
                 }
@@ -318,11 +428,11 @@ namespace ltj {
                 var_type var_s, var_p, var_o;
                 bool s = false, p = false, o = false;
                 var_to_orders_type var_to_orders;
+                //var_to_orders_type lonely_to_orders; //This can be removed if we choose to not calculate the weight of lonely vars as the ring does.
                 var_to_orders = get_orders(triple);//TODO: try to use a const-ref.
                 if(triple.s_is_variable()){
                     var_s = (var_type) triple.term_s.value;
-                    auto& orders = var_to_orders[var_s];
-                    create_iterators(var_s, triple, i, orders);
+                    create_iterators(var_s, triple, i, var_to_orders[var_s]);
                     s = true;
                     if(triple.p_is_variable()){
                         get_triple_info(var_s, i).related.insert((var_type) triple.term_p.value);
@@ -369,6 +479,8 @@ namespace ltj {
             for(auto& var_info : m_var_info){
                 var_info.n_triples = m_var_to_n_triples[var_info.name];
             }
+            refresh_lonely_var_iters();
+            //Calculate the GAO.
             m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, &m_var_to_iterators, m_ptr_index, m_gao);
             m_gao_vars.reserve(m_gao_size.number_of_variables);
 
