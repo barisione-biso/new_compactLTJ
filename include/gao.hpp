@@ -207,7 +207,7 @@ namespace ltj {
             }*/
             //std::cout << "done."<< std::endl;
         }
-
+        /*
         inline void add_var_to_iterator(const var_type var, ltj_iter_type* ptr_iterator){
             auto it =  m_var_to_iterators->find(var);
             if(it != m_var_to_iterators->end()){
@@ -217,6 +217,7 @@ namespace ltj {
                 m_var_to_iterators->insert({var, vec});
             }
         }
+        */
         //! Copy constructor
         gao_size(const gao_size &o) {
             copy(o);
