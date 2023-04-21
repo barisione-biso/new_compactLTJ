@@ -50,7 +50,7 @@ namespace ltj {
         cltj::CTrie *m_trie;
         size_type m_number_of_constants;
 
-        var_type m_var_owner;
+        var_type m_owner_var;
         std::string m_var_order;
         typedef std::vector<std::string> orders_type;
         //TODO: the following are legacy variables that needs to be refactor.
@@ -113,6 +113,7 @@ namespace ltj {
         const bool &is_empty = m_is_empty;
         const std::vector<uint64_t>& order = m_order;
         const std::string& var_order = m_var_order;//TODO: rename, it is a really bad name!
+        const var_type& owner_var = m_owner_var;
         //const value_type &cur_s = m_cur_s;
         //const value_type &cur_p = m_cur_p;
         //const value_type &cur_o = m_cur_o;
@@ -124,7 +125,7 @@ namespace ltj {
             //m_cur_s = -1UL;
             //m_cur_p = -1UL;
             //m_cur_o = -1UL;
-            m_var_owner = var;
+            m_owner_var = var;
             m_var_order = var_order;
             m_number_of_constants = 0;
 
@@ -247,17 +248,17 @@ namespace ltj {
             std::stringstream partial_order;
             if(!m_ptr_triple_pattern->term_s.is_variable){
                 partial_order<<"0 ";
-            }else if((var_type) m_ptr_triple_pattern->term_s.value != m_var_owner){
+            }else if((var_type) m_ptr_triple_pattern->term_s.value != m_owner_var){
                 variables.emplace_back("0");
             }
             if(!m_ptr_triple_pattern->term_p.is_variable){
                 partial_order<<"1 ";
-            }else if((var_type) m_ptr_triple_pattern->term_p.value != m_var_owner){
+            }else if((var_type) m_ptr_triple_pattern->term_p.value != m_owner_var){
                 variables.emplace_back("1");
             }
             if(!m_ptr_triple_pattern->term_o.is_variable){
                 partial_order<<"2 ";
-            }else if((var_type) m_ptr_triple_pattern->term_o.value != m_var_owner){
+            }else if((var_type) m_ptr_triple_pattern->term_o.value != m_owner_var){
                 variables.emplace_back("2");
             }
             //Adding the variable order, the "owner" of this iterator.

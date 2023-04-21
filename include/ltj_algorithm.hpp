@@ -96,7 +96,7 @@ namespace ltj {
         triple_info_type& get_triple_info(var_type x_j, size_type triple_index){
             return get_var_info(x_j).triples[triple_index];
         }
-        std::unordered_map<size_type, triple_info_type>& get_triples(var_type x_j){
+        std::unordered_map<size_type, triple_info_type>& get_triples_info(var_type x_j){
             return get_var_info(x_j).triples;
         }
         orders_to_iterators_type& get_var_iterators_by_triple(var_type x_j, size_type triple_index){
@@ -351,7 +351,7 @@ namespace ltj {
                     //std::cout << "New iter for " << (size_type) x_j << " with order " << order << " and weight " << weight << std::endl;
                     var_to_vector(x_j, weight, m_hash_table_position, m_var_info);
                     //>> Ordenar
-                    auto& triples = get_triples(x_j);
+                    auto& triples = get_triples_info(x_j);
                     auto& triple = triples[triple_index];
                     auto& order_to_iterator = triple.order_to_iterator;
                     order_to_iterator[order] = iter;
@@ -488,14 +488,31 @@ namespace ltj {
             }
             std::cout << "done." << std::endl;
         }
+        //Used exclusively for adaptive algorithm.
+        void clear_iterators(var_type x_j){
+            //Triples_{x_j}
+            auto& triples_xj = get_triples_info(x_j);
+            for(auto& triple_xj : triples_xj){
+                size_type t_index = triple_xj.first;
+                //The entry in `m_triple_iters` that we will check to know whether it has iterators or not.
+                orders_to_iterators_type& triple_iter = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
+                for (auto it = triple_iter.begin(); it != triple_iter.end();){
+                    if(it->second->owner_var == x_j){
+                        triple_iter.erase(it);
+                    } else{
+                        ++it;
+                    }
+                }
+            }
+        }
         //Used by Precalculated GAO and adaptive variants.
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
         void assign_iterators(var_type x_j){
             //Triples_{x_j}
-            auto& triples_xj = get_triples(x_j);
+            auto& triples_xj = get_triples_info(x_j);
             for(auto& triple_xj : triples_xj){
                 size_type t_index = triple_xj.first;
-                //The entry in m_triple_iters that we will check to know whether it has iterators or not.
+                //The entry in `m_triple_iters` that we will check to know whether it has iterators or not.
                 orders_to_iterators_type& triple_iter = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
                 if(triple_iter.empty()){//If the map is empty then there aren't any Iterators attached to it.
                     //If empty then assign all x_j iters.
@@ -627,13 +644,14 @@ namespace ltj {
         }
         var_type next(const size_type j) {
             if(index_scheme::util::configuration.is_adaptive()){
-                var_type var = '\0';
+                var_type new_var = '\0';
                 const var_type& cur_var = m_gao_stack.top();
                 const std::unordered_map<var_type, bool> & b_vars = m_gao_vars;
                 //refresh rel var iterators?
                 m_gao_size.update_weights(j, cur_var, b_vars, m_var_to_iterators);
-                var = m_gao_size.get_next_var(j, m_gao_vars);
-                return var;
+                new_var = m_gao_size.get_next_var(j, m_gao_vars);
+                assign_iterators(new_var);
+                return new_var;
             }
             return m_gao[j];
         }
@@ -664,11 +682,11 @@ namespace ltj {
                     const size_type limit_results = 0, const size_type timeout_seconds = 0){
 
             //(Optional) Check timeout
-            /*if(timeout_seconds > 0){
+            if(timeout_seconds > 0){
                 time_point_type stop = std::chrono::high_resolution_clock::now();
                 size_type sec = std::chrono::duration_cast<std::chrono::seconds>(stop-start).count();
                 if(sec > timeout_seconds) return false;
-            }*/
+            }
 
             //(Optional) Check limit
             if(limit_results > 0 && res.size() == limit_results) return false;
@@ -736,6 +754,7 @@ namespace ltj {
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
                     m_gao_size.set_previous_weight();
+                    clear_iterators(x_j);
                 }
                 pop_var_of_stack();
                 //std::cout << " pop. " << std::endl;
