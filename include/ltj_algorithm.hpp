@@ -286,6 +286,10 @@ namespace ltj {
                 d. If there are 3 (or 0) lonely:
                     Do nothing.
             */
+            if(m_ptr_triple_patterns->size() <= 1){
+                //if the BGP has only a single triple then there's nothing to do in this function.
+                return;
+            }
             size_type i = 0;
 
             for(const auto& triple : *m_ptr_triple_patterns){
@@ -317,7 +321,7 @@ namespace ltj {
                         orders_to_iterators_type& iterator_per_order = get_var_iterators_by_triple(var, i);
                         for(auto& it : iterator_per_order){
                             //deleting ltj_iter_type* iter.
-                            delete it.second;//TODO: Check if it works or not.
+                            delete it.second;//TODO: This delete does not work. Fix it!
                         }
                         iterator_per_order.clear();
                         //Add a reference to the non-lonely var iterator(s).
@@ -450,7 +454,7 @@ namespace ltj {
             //Calculate the GAO.
             m_gao_size = gao_size<info_var_type, var_to_iterators_type, index_scheme_type>(m_ptr_triple_patterns, m_var_info, m_hash_table_position, &m_var_to_iterators, m_ptr_index, m_gao);
             m_gao_vars.reserve(m_gao_size.number_of_variables);
-
+            //Initializing BGP Triples structure.
             m_triple_iters.reserve(m_ptr_triple_patterns->size());
             for(int k=0; k < m_ptr_triple_patterns->size(); k++){
                 orders_to_iterators_type aux;
@@ -482,7 +486,7 @@ namespace ltj {
                     }
                 }
             }
-            //std::cout << "done." << std::endl;
+            std::cout << "done." << std::endl;
         }
         //Used by Precalculated GAO and adaptive variants.
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
@@ -513,6 +517,9 @@ namespace ltj {
                     } else if(triple_iter.size() == 2){
                         //for(auto& t : triple_iter){//triple_iter is orders_to_iterators_type, and t => pair of order:iterator
                         for (auto it = triple_iter.begin(); it != triple_iter.end();){
+                            if(triple_iter.size() <= 1){
+                                break;//This condition exist to not delete all the iterators. We need to leave 1.
+                            }
                             auto&iter = it->second;
                             const auto& triple_definition = m_ptr_triple_patterns->at(t_index);
                             //iter.order is a vector of length 3.
@@ -522,16 +529,22 @@ namespace ltj {
                                     //Removes specified elements from the container. The order of the remaining elements is preserved. (This makes it possible to erase individual elements while iterating through the container.)
                                     //https://en.cppreference.com/w/cpp/container/unordered_map/erase
                                     triple_iter.erase(it);
+                                }else{
+                                    ++it;
                                 }
                             } else if(iter->order[1] == 1){ //second level of trie is a predicate
                                 if(triple_definition.p_is_variable() && triple_definition.term_p.value != x_j){
                                     //This iterator must be deleted of our bgp_triples structure.
                                     triple_iter.erase(it);
+                                }else{
+                                    ++it;
                                 }
                             } else {//second level of trie is an object
                                 if(triple_definition.o_is_variable() && triple_definition.term_o.value != x_j){
                                     //This iterator must be deleted of our bgp_triples structure.
                                     triple_iter.erase(it);
+                                }else{
+                                    ++it;
                                 }
                             }
                         }
