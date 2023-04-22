@@ -486,24 +486,43 @@ namespace ltj {
                     }
                 }
             }
-            std::cout << "done." << std::endl;
+            //std::cout << "done." << std::endl;
         }
-        //Used exclusively for adaptive algorithm.
+        //Used exclusively in the adaptive algorithm.
         void clear_iterators(var_type x_j){
+            //1. Clearing m_var_to_iterators for x_j.
+            m_var_to_iterators[x_j].clear();
+            //2. Clearing bgp_triples structure.
             //Triples_{x_j}
             auto& triples_xj = get_triples_info(x_j);
             for(auto& triple_xj : triples_xj){
-                size_type t_index = triple_xj.first;
-                //The entry in `m_triple_iters` that we will check to know whether it has iterators or not.
-                orders_to_iterators_type& triple_iter = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
-                for (auto it = triple_iter.begin(); it != triple_iter.end();){
+                size_type t_index = triple_xj.first;//Su indice.
+                auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
+                //The entry in `m_triple_iters` that we will check to know whether it has iterators owned by x_j .
+                orders_to_iterators_type& iterators = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
+                for (auto it = iterators.begin(); it != iterators.end();){
                     if(it->second->owner_var == x_j){
-                        triple_iter.erase(it);
+                        //>>Besides deleting the iter from m_triples_iter[t_index], we need to delete it from m_var_to_iterators x_j' related_variables.
+                        for(var_type rel_var :triple_info.related){
+                            auto& iter_vector = m_var_to_iterators[rel_var];//check each related variables iterators.
+                            for(auto rel_var_it = iter_vector.begin();rel_var_it != iter_vector.end();){
+                                std::cout << "Test "<<std::endl;
+                                /*if(rel_var_it->owner_var == x_j){
+                                    m_var_to_iterators[rel_var].erase(rel_var_it);
+                                }else{
+                                    ++rel_var_it;
+                                }*/
+                            }
+                            m_var_to_iterators[rel_var].emplace_back(it->second);
+                        }
+                        //<<Besides deleting the iter from m_triples_iter[t_index], we need to delete it from m_var_to_iterators x_j' related_variables.
+                        iterators.erase(it);
                     } else{
                         ++it;
                     }
                 }
             }
+
         }
         //Used by Precalculated GAO and adaptive variants.
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
@@ -651,6 +670,19 @@ namespace ltj {
                 m_gao_size.update_weights(j, cur_var, b_vars, m_var_to_iterators);
                 new_var = m_gao_size.get_next_var(j, m_gao_vars);
                 assign_iterators(new_var);
+                //Todos los triples de new_var
+                auto& triples_xj = get_triples_info(new_var);
+                for(auto& triple_xj : triples_xj){
+                    size_type t_index = triple_xj.first;//Su indice.
+                    auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
+                    orders_to_iterators_type& iterators = m_triple_iters[t_index];//Los iteradores del triple.
+                    for (auto it = iterators.begin(); it != iterators.end(); ++it){
+                        m_var_to_iterators[new_var].emplace_back(it->second);
+                        for(var_type rel_var :triple_info.related){
+                            m_var_to_iterators[rel_var].emplace_back(it->second);
+                        }
+                    }
+                }
                 return new_var;
             }
             return m_gao[j];
