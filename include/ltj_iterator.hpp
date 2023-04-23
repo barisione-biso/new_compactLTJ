@@ -43,6 +43,7 @@ namespace ltj {
     private:
         const rdf::triple_pattern *m_ptr_triple_pattern;
         index_scheme_type *m_ptr_index; //TODO: should be const
+        size_type m_triple_index;
         //value_type m_cur_s;
         //value_type m_cur_p;
         //value_type m_cur_o;
@@ -114,14 +115,16 @@ namespace ltj {
         const std::vector<uint64_t>& order = m_order;
         const std::string& var_order = m_var_order;//TODO: rename, it is a really bad name!
         const var_type& owner_var = m_owner_var;
+        const size_type& triple_index = m_triple_index;
         //const value_type &cur_s = m_cur_s;
         //const value_type &cur_p = m_cur_p;
         //const value_type &cur_o = m_cur_o;
 
         ltj_iterator() = default;
-        ltj_iterator(const rdf::triple_pattern *triple, var_type var, std::string var_order, index_scheme_type *index) {
+        ltj_iterator(const rdf::triple_pattern *triple, var_type var, std::string var_order, index_scheme_type *index, size_type triple_index) {
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
+            m_triple_index = triple_index;
             //m_cur_s = -1UL;
             //m_cur_p = -1UL;
             //m_cur_o = -1UL;

@@ -343,7 +343,7 @@ namespace ltj {
                 return;
             }else{
                 for(auto& order : orders){
-                    auto* iter = new ltj_iter_type(&triple, x_j, order, m_ptr_index);
+                    auto* iter = new ltj_iter_type(&triple, x_j, order, m_ptr_index, triple_index);
                     if(iter->is_empty){
                         m_is_empty = true;
                     }
@@ -461,12 +461,14 @@ namespace ltj {
                 m_triple_iters.emplace_back(aux);
             }
             //Finally assigning only a single iterator per triple (using m_m_var_to_iterators).
+            /*if(index_scheme::util::configuration.is_adaptive()){
+                manage_iterators(m_gao_size.get_starting_var());
+            }else{*/
             if(!index_scheme::util::configuration.is_adaptive()){
                 //Go through all vars in GAO and assign iterators into m_var_to_iterators.
                 for(var_type& x_j : m_gao){
-                    assign_iterators(x_j);
+                    assign_iterators_to_bgp_triples(x_j);
                 }
-
                 //Cuando terminamos hay un solo iterador por cada triple. Debemos asignar dicho iterador para todas las variables x_k / 0 <= k <= 3 y que pertenecen al triple[i], i in |bgp|.
                 //usando m_var_to_iterators[x_k] via add_var_to_iterator
                 for(int k = 0; k < m_triple_iters.size(); k++){
@@ -490,43 +492,75 @@ namespace ltj {
         }
         //Used exclusively in the adaptive algorithm.
         void clear_iterators(var_type x_j){
-            //1. Clearing m_var_to_iterators for x_j.
+            //1. Clearing all iterators in m_var_to_iterators for x_j.
             m_var_to_iterators[x_j].clear();
-            //2. Clearing bgp_triples structure.
+            //2. Then, among the triples_{x_j}, check whether the iters of their related vars are owned by x_j. If so the iterator must be deleted.
             //Triples_{x_j}
             auto& triples_xj = get_triples_info(x_j);
             for(auto& triple_xj : triples_xj){
                 size_type t_index = triple_xj.first;//Su indice.
                 auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
+                for(var_type rel_var : triple_info.related){
+                    for(auto it = m_var_to_iterators[rel_var].begin();it != m_var_to_iterators[rel_var].end();){
+                        if((*it)->triple_index == t_index){
+                            for(auto rel_var_it = m_var_to_iterators[rel_var].begin();it != m_var_to_iterators[rel_var].end();){
+                                if((*rel_var_it)->owner_var == x_j){
+                                    m_var_to_iterators[rel_var].erase(it);
+                                }
+                            }
+                        }else{
+                            ++it;
+                        }
+                    }
+                    /*
+                    auto& iter_vector = m_var_to_iterators[rel_var];//check each related variables iterators.
+                    for(auto rel_var_it = iter_vector.begin();rel_var_it != iter_vector.end();){
+                        if((*rel_var_it)->owner_var == x_j){
+                            m_var_to_iterators[rel_var].erase(rel_var_it);
+                        }else{
+                            ++rel_var_it;
+                        }
+                    }
+                    */
+                }
+
+                //clearing BGP triple status as well.
+                orders_to_iterators_type& triple_iter = m_triple_iters[t_index];
+                for(auto it = triple_iter.begin();it != triple_iter.end();){
+                    if(it->second->owner_var == x_j){
+                        triple_iter.erase(it);
+                    }else{
+                        ++it;
+                    }
+                }
                 //The entry in `m_triple_iters` that we will check to know whether it has iterators owned by x_j .
-                orders_to_iterators_type& iterators = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
+                /*orders_to_iterators_type& iterators = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
                 for (auto it = iterators.begin(); it != iterators.end();){
                     if(it->second->owner_var == x_j){
                         //>>Besides deleting the iter from m_triples_iter[t_index], we need to delete it from m_var_to_iterators x_j' related_variables.
                         for(var_type rel_var :triple_info.related){
                             auto& iter_vector = m_var_to_iterators[rel_var];//check each related variables iterators.
                             for(auto rel_var_it = iter_vector.begin();rel_var_it != iter_vector.end();){
-                                std::cout << "Test "<<std::endl;
-                                /*if(rel_var_it->owner_var == x_j){
+                                if((*rel_var_it)->owner_var == x_j){
                                     m_var_to_iterators[rel_var].erase(rel_var_it);
                                 }else{
                                     ++rel_var_it;
-                                }*/
+                                }
                             }
-                            m_var_to_iterators[rel_var].emplace_back(it->second);
+                            //m_var_to_iterators[rel_var].emplace_back(it->second);???
                         }
                         //<<Besides deleting the iter from m_triples_iter[t_index], we need to delete it from m_var_to_iterators x_j' related_variables.
-                        iterators.erase(it);
-                    } else{
-                        ++it;
-                    }
-                }
+                        //iterators.erase(it);
+                    } //else{
+                    ++it;
+                    //}
+                }*/
             }
 
         }
         //Used by Precalculated GAO and adaptive variants.
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
-        void assign_iterators(var_type x_j){
+        void assign_iterators_to_bgp_triples(var_type x_j){
             //Triples_{x_j}
             auto& triples_xj = get_triples_info(x_j);
             for(auto& triple_xj : triples_xj){
@@ -669,25 +703,34 @@ namespace ltj {
                 //refresh rel var iterators?
                 m_gao_size.update_weights(j, cur_var, b_vars, m_var_to_iterators);
                 new_var = m_gao_size.get_next_var(j, m_gao_vars);
-                assign_iterators(new_var);
-                //Todos los triples de new_var
-                auto& triples_xj = get_triples_info(new_var);
-                for(auto& triple_xj : triples_xj){
-                    size_type t_index = triple_xj.first;//Su indice.
-                    auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
-                    orders_to_iterators_type& iterators = m_triple_iters[t_index];//Los iteradores del triple.
-                    for (auto it = iterators.begin(); it != iterators.end(); ++it){
-                        m_var_to_iterators[new_var].emplace_back(it->second);
-                        for(var_type rel_var :triple_info.related){
-                            m_var_to_iterators[rel_var].emplace_back(it->second);
-                        }
-                    }
-                }
+                manage_iterators(new_var);
                 return new_var;
             }
             return m_gao[j];
         }
-
+        void manage_iterators(var_type new_var){
+            //1.assign iters to bgp_triples
+            assign_iterators_to_bgp_triples(new_var);
+            //2. Copy the iterators to m_var_to_iterators map which is used by LTJ.
+            //Todos los triples de new_var: contiene informacion de X_j, sus triples
+            //Con todas las permutaciones posibles de iteradores.
+            auto& triples_xj = get_triples_info(new_var);
+            for(auto& triple_xj : triples_xj){
+                size_type t_index = triple_xj.first;//Su indice.
+                auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
+                //Status de iteradores asignados a triples, usando la estructura BGP triples.
+                orders_to_iterators_type& iterators = m_triple_iters[t_index];//Los iteradores del triple.
+                for (auto it = iterators.begin(); it != iterators.end(); ++it){
+                    //Si la variable dueña del iterador no ha sido procesada, eso significa que no existe su iterador en m_var_to_iterators, ya sea como la sig variable (new_var) o como una de sus relacionadas.
+                    if(!m_gao_vars[it->second->owner_var])
+                        m_var_to_iterators[new_var].emplace_back(it->second);
+                    for(var_type rel_var :triple_info.related){
+                        if(!m_gao_vars[rel_var])
+                            m_var_to_iterators[rel_var].emplace_back(it->second);
+                    }
+                }
+            }
+        }
         void push_var_to_stack(const var_type& x_j){
             //assert (m_gao_stack.top() == x_j);
             m_gao_stack.push(x_j);
