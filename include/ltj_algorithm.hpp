@@ -725,17 +725,35 @@ namespace ltj {
                 auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
                 //Status de iteradores asignados a triples, usando la estructura BGP triples.
                 orders_to_iterators_type& iterators = m_triple_iters[t_index];//Los iteradores del triple.
+                const auto& triple_definition = m_ptr_triple_patterns->at(t_index);
                 for (auto it = iterators.begin(); it != iterators.end(); ++it){
                     /*
                     Si la variable dueña del iterador no ha sido procesada,
                     entonces no existe su iterador en m_var_to_iterators,
                     ya sea como la siguiente variable (new_var) o como una de sus relacionadas.
                     */
-                    if(!m_gao_vars[it->second->owner_var])
+                    if(!m_gao_vars[it->second->owner_var]){
                         m_var_to_iterators[new_var].emplace_back(it->second);
-                    for(var_type rel_var :triple_info.related){
-                        if(!m_gao_vars[rel_var])
-                            m_var_to_iterators[rel_var].emplace_back(it->second);
+                        for(var_type rel_var :triple_info.related){
+                            if(!m_gao_vars[rel_var]){
+                                if(it->second->order[it->second->get_depth() + 1] == 0 &&
+                                    triple_definition.s_is_variable() &&
+                                    triple_definition.term_s.value == rel_var){
+                                    //Subject
+                                    m_var_to_iterators[rel_var].emplace_back(it->second);
+                                } else if(it->second->order[it->second->get_depth() + 1] == 1 &&
+                                    triple_definition.p_is_variable() &&
+                                    triple_definition.term_p.value == rel_var){
+                                    //Predicate
+                                    m_var_to_iterators[rel_var].emplace_back(it->second);
+                                } else if(it->second->order[it->second->get_depth() + 1] == 2 &&
+                                    triple_definition.o_is_variable() &&
+                                    triple_definition.term_o.value == rel_var){
+                                    //Object
+                                    m_var_to_iterators[rel_var].emplace_back(it->second);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -814,7 +832,7 @@ namespace ltj {
                 }else {
 
                     value_type c = seek(x_j, j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -833,7 +851,7 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
