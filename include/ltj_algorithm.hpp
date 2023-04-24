@@ -809,7 +809,11 @@ namespace ltj {
                 push_var_to_stack(x_j);
                 std::vector<ltj_iter_type*>& itrs = m_var_to_iterators[x_j];
                 bool ok;
-                //The second case means when there's only a triple, all vars are lonely (Some of them are not in the last level though). Therefore we dont need to do an extra down.
+                /*
+                The second case is intented to exclude the down() from happening when there's only a single triple in the BGP. 
+                    In this case all its variables are lonely (Some of them are not in the last level though). Therefore we dont need to do an extra down.
+                */
+               
                 if(itrs.size() == 1 && !itrs[0]->in_last_level() && m_ptr_triple_patterns->size() > 1){
                     itrs[0]->down(x_j);
                 }
