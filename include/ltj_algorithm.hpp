@@ -813,10 +813,10 @@ namespace ltj {
                 The second case is intented to exclude the down() from happening when there's only a single triple in the BGP. 
                     In this case all its variables are lonely (Some of them are not in the last level though). Therefore we dont need to do an extra down.
                 */
-               
+               /*
                 if(itrs.size() == 1 && !itrs[0]->in_last_level() && m_ptr_triple_patterns->size() > 1){
                     itrs[0]->down(x_j);
-                }
+                }*/
                 if(itrs.size() == 1 && itrs[0]->in_last_level()) {//Lonely variables in the last level.
 
                     auto results = itrs[0]->seek_all(x_j);
