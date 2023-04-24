@@ -726,7 +726,11 @@ namespace ltj {
                 //Status de iteradores asignados a triples, usando la estructura BGP triples.
                 orders_to_iterators_type& iterators = m_triple_iters[t_index];//Los iteradores del triple.
                 for (auto it = iterators.begin(); it != iterators.end(); ++it){
-                    //Si la variable dueña del iterador no ha sido procesada, eso significa que no existe su iterador en m_var_to_iterators, ya sea como la sig variable (new_var) o como una de sus relacionadas.
+                    /*
+                    Si la variable dueña del iterador no ha sido procesada,
+                    entonces no existe su iterador en m_var_to_iterators,
+                    ya sea como la siguiente variable (new_var) o como una de sus relacionadas.
+                    */
                     if(!m_gao_vars[it->second->owner_var])
                         m_var_to_iterators[new_var].emplace_back(it->second);
                     for(var_type rel_var :triple_info.related){
@@ -810,7 +814,7 @@ namespace ltj {
                 }else {
 
                     value_type c = seek(x_j, j);
-                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -829,7 +833,7 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
