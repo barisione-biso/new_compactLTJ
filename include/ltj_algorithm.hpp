@@ -490,43 +490,48 @@ namespace ltj {
             }
             //std::cout << "done." << std::endl;
         }
+
+        void clear_iterators(var_type var, size_type triple_index, var_type iterator_owner_var){
+            //Por cada iterador de var.
+            for(auto it = m_var_to_iterators[var].begin();it != m_var_to_iterators[var].end();){
+                //Restringidos al triple dado por 'triple_index'
+                if((*it)->triple_index == triple_index){
+                    if(m_var_to_iterators[var].size() <= 0){
+                        break;
+                    }
+                    if((*it)->owner_var == iterator_owner_var){
+                        m_var_to_iterators[var].erase(it);
+                    }else{
+                        ++it;
+                    }
+                }else{
+                    ++it;
+                }
+            }
+        }
         //Used exclusively in the adaptive algorithm.
         void clear_iterators(var_type x_j){
-            //1. Clearing all iterators in m_var_to_iterators for x_j.
-            m_var_to_iterators[x_j].clear();
+            //1. Clearing all iterators in m_var_to_iterators for x_j owned by x_j.
+            //m_var_to_iterators[x_j].clear();
             //2. Then, among the triples_{x_j}, check whether the iters of their related vars are owned by x_j. If so the iterator must be deleted.
             //Triples_{x_j}
             auto& triples_xj = get_triples_info(x_j);
             for(auto& triple_xj : triples_xj){
                 size_type t_index = triple_xj.first;//Su indice.
                 auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
+                //1. Clearing all iterators in m_var_to_iterators for x_j owned by x_j.
+                clear_iterators(x_j, t_index, x_j);
+                //2. Then, among the triples_{x_j}, check whether the iters of their related vars are owned by x_j. If so the iterator must be deleted.
                 for(var_type rel_var : triple_info.related){
-                    for(auto it = m_var_to_iterators[rel_var].begin();it != m_var_to_iterators[rel_var].end();){
-                        if((*it)->triple_index == t_index){
-                            for(auto rel_var_it = m_var_to_iterators[rel_var].begin();it != m_var_to_iterators[rel_var].end();){
-                                if((*rel_var_it)->owner_var == x_j){
-                                    m_var_to_iterators[rel_var].erase(it);
-                                }
-                            }
-                        }else{
-                            ++it;
-                        }
-                    }
-                    /*
-                    auto& iter_vector = m_var_to_iterators[rel_var];//check each related variables iterators.
-                    for(auto rel_var_it = iter_vector.begin();rel_var_it != iter_vector.end();){
-                        if((*rel_var_it)->owner_var == x_j){
-                            m_var_to_iterators[rel_var].erase(rel_var_it);
-                        }else{
-                            ++rel_var_it;
-                        }
-                    }
-                    */
+                    clear_iterators(rel_var, t_index, x_j);
                 }
 
                 //clearing BGP triple status as well.
                 orders_to_iterators_type& triple_iter = m_triple_iters[t_index];
                 for(auto it = triple_iter.begin();it != triple_iter.end();){
+                    if(triple_iter.size() <= 0){//TODO: esto podria ser un punto de problema cuando hay 3 vars o no?
+                        break;
+                    }
                     if(it->second->owner_var == x_j){
                         triple_iter.erase(it);
                     }else{
