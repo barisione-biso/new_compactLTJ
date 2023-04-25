@@ -708,9 +708,7 @@ namespace ltj {
                 //refresh rel var iterators?
                 m_gao_size.update_weights(j, cur_var, b_vars, m_var_to_iterators);
                 new_var = m_gao_size.get_next_var(j, m_gao_vars);
-                std::cout << "<< manage_iterators " << x_j << std::endl;
                 manage_iterators(new_var);
-                std::cout << "<< manage_iterators " << x_j << std::endl;
                 return new_var;
             }
             return m_gao[j];
@@ -722,7 +720,6 @@ namespace ltj {
             //Todos los triples de new_var: contiene informacion de X_j, sus triples
             //Con todas las permutaciones posibles de iteradores.
 
-            std::cout << ">> copying the iterators " << x_j << std::endl;
             auto& triples_xj = get_triples_info(new_var);
             for(auto& triple_xj : triples_xj){
                 size_type t_index = triple_xj.first;//Su indice.
@@ -761,7 +758,6 @@ namespace ltj {
                     }
                 }
             }
-            std::cout << "<< copying the iterators " << x_j << std::endl;
         }
         void push_var_to_stack(const var_type& x_j){
             //assert (m_gao_stack.top() == x_j);
@@ -800,13 +796,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                
+                /*
                 std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
                 std::cout << " " << std::endl;
-                
+                */
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -841,7 +837,7 @@ namespace ltj {
                 }else {
 
                     value_type c = seek(x_j, j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -860,14 +856,14 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
                     m_gao_size.set_previous_weight();
-                    std::cout << ">> clear_iterators " << x_j << std::endl;
-                    clear_iterators(x_j);
-                    std::cout << "<< clear_iterators " << x_j << std::endl;
+                    if( j > 0){//First variable is fixed. Its iterators shouldn't be cleared.
+                        clear_iterators(x_j);
+                    }
                 }
                 pop_var_of_stack();
                 //std::cout << " pop. " << std::endl;

@@ -330,7 +330,7 @@ namespace ltj {
                     if(!is_var_bound(v.name, m_gao_vars)){
                         //Non-lonely first.
                         if(j < m_lonely_start){
-                            if(v.n_triples > 1 && v.weight < min_weight){
+                            if(v.n_triples > 1 && v.weight <= min_weight){
                                 min_weight = v.weight;
                                 min_var = v.name;
                             }
