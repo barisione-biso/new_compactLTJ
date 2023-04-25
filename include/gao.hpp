@@ -320,6 +320,7 @@ namespace ltj {
         }
         //Linear search on 'm_var_info' for the non-bound variable with minimum weight.
         var_type get_next_var(const size_type& j, const std::unordered_map<var_type,bool> &m_gao_vars) const{
+            std::cout << ">> get_next_var " << j << std::endl;
             size_type min_weight = -1ULL;
             var_type min_var = '\0';
 
@@ -344,6 +345,7 @@ namespace ltj {
                     }
                 }
             }
+            std::cout << "<< get_next_var " << j << " returning variable : " << (int) min_var << std::endl;
             return min_var;
         }
         //Sets back previous weight value in constant time*.
