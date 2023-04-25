@@ -492,6 +492,8 @@ namespace ltj {
         }
 
         void clear_iterators(var_type var, size_type triple_index, var_type iterator_owner_var){
+            if(m_gao_size.get_starting_var() == var || m_gao_size.get_starting_var() == iterator_owner_var)
+                return;
             //Por cada iterador de var.
             for(auto it = m_var_to_iterators[var].begin();it != m_var_to_iterators[var].end();){
                 //Restringidos al triple dado por 'triple_index'
