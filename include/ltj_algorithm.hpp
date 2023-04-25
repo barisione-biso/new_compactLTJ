@@ -502,7 +502,7 @@ namespace ltj {
                         break;
                     }
                     if((*it)->owner_var == iterator_owner_var){
-                        m_var_to_iterators[var].erase(it);
+                        it = m_var_to_iterators[var].erase(it);
                     }else{
                         ++it;
                     }
@@ -531,37 +531,15 @@ namespace ltj {
                 //clearing BGP triple status as well.
                 orders_to_iterators_type& triple_iter = m_triple_iters[t_index];
                 for(auto it = triple_iter.begin();it != triple_iter.end();){
-                    if(triple_iter.size() <= 0){//TODO: esto podria ser un punto de problema cuando hay 3 vars o no?
+                    if(triple_iter.size() <= 0){//TODO:  REMOVE, not needed anymore! [OLD COMMENT: esto podria ser un punto de problema cuando hay 3 vars o no?]
                         break;
                     }
                     if(it->second->owner_var == x_j){
-                        triple_iter.erase(it);
+                        it = triple_iter.erase(it);
                     }else{
                         ++it;
                     }
                 }
-                //The entry in `m_triple_iters` that we will check to know whether it has iterators owned by x_j .
-                /*orders_to_iterators_type& iterators = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
-                for (auto it = iterators.begin(); it != iterators.end();){
-                    if(it->second->owner_var == x_j){
-                        //>>Besides deleting the iter from m_triples_iter[t_index], we need to delete it from m_var_to_iterators x_j' related_variables.
-                        for(var_type rel_var :triple_info.related){
-                            auto& iter_vector = m_var_to_iterators[rel_var];//check each related variables iterators.
-                            for(auto rel_var_it = iter_vector.begin();rel_var_it != iter_vector.end();){
-                                if((*rel_var_it)->owner_var == x_j){
-                                    m_var_to_iterators[rel_var].erase(rel_var_it);
-                                }else{
-                                    ++rel_var_it;
-                                }
-                            }
-                            //m_var_to_iterators[rel_var].emplace_back(it->second);???
-                        }
-                        //<<Besides deleting the iter from m_triples_iter[t_index], we need to delete it from m_var_to_iterators x_j' related_variables.
-                        //iterators.erase(it);
-                    } //else{
-                    ++it;
-                    //}
-                }*/
             }
 
         }
@@ -605,21 +583,21 @@ namespace ltj {
                                     //This iterator must be deleted of our bgp_triples structure.
                                     //Removes specified elements from the container. The order of the remaining elements is preserved. (This makes it possible to erase individual elements while iterating through the container.)
                                     //https://en.cppreference.com/w/cpp/container/unordered_map/erase
-                                    triple_iter.erase(it);
+                                    it = triple_iter.erase(it);
                                 }else{
                                     ++it;
                                 }
                             } else if(iter->order[1] == 1){ //second level of trie is a predicate
                                 if(triple_definition.p_is_variable() && triple_definition.term_p.value != x_j){
                                     //This iterator must be deleted of our bgp_triples structure.
-                                    triple_iter.erase(it);
+                                    it = triple_iter.erase(it);
                                 }else{
                                     ++it;
                                 }
                             } else {//second level of trie is an object
                                 if(triple_definition.o_is_variable() && triple_definition.term_o.value != x_j){
                                     //This iterator must be deleted of our bgp_triples structure.
-                                    triple_iter.erase(it);
+                                    it = triple_iter.erase(it);
                                 }else{
                                     ++it;
                                 }
