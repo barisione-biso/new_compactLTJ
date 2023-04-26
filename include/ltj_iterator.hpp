@@ -354,10 +354,9 @@ namespace ltj {
             }else{
                 if(m_at_root){
                     return 958844164;//TODO: CURRENTLY HARDCODED. Pending read the number of triples from a file generated at index built time.
-                }else (m_depth == 0){
+                }else if(m_depth == 0){
                     return m_trie->subtree_size(m_it);
-                }
-                }else (m_depth == 1){
+                }else if(m_depth == 1){
                     return m_trie->childrenCount(m_parent_it);
                 }else{
                     return -1;
