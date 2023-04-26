@@ -352,9 +352,19 @@ namespace ltj {
             if(m_number_of_constants == 0){
                 return -1UL; //Border Case, when there are no constants all the weight have to be the maximum value or the number of triples in the BGP (which is what the Ring does).
             }else{
-                return m_trie->childrenCount(m_parent_it);
+                if(m_at_root){
+                    return 958844164;//TODO: CURRENTLY HARDCODED. Pending read the number of triples from a file generated at index built time.
+                }else (m_depth == 0){
+                    return m_trie->subtree_size(m_it);
+                }
+                }else (m_depth == 1){
+                    return m_trie->childrenCount(m_parent_it);
+                }else{
+                    return -1;
+                }
             }
         }
+
         void down(var_type var){// Go down in the trie
             if(m_at_root){
                 m_at_root = false;

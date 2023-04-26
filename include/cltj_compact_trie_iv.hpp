@@ -93,7 +93,23 @@ namespace cltj {
             uint32_t childrenCount(uint32_t it){
                 return succ0(it) - it;
             }
+            // subtree size assuming a node at depth 1
+            // depth -1 node is just n (flag m_at_root)
+            // depth 0 node is the same as children count
+            // depth 2 is just 1
+            //**** This function only handles depth 1. ****
+            const uint64_t subtree_size(uint64_t it){
+                uint64_t n_children = childrenCount(it);
 
+                uint64_t leftmost_leaf, rightmost_leaf;
+
+                leftmost_leaf = child(child(it, 1), 1);
+                it = child(it, n_children);
+
+                n_children = childrenCount(it);
+                rightmost_leaf = child(it, n_children);
+                return rightmost_leaf - leftmost_leaf + 1;
+            }
             /*
                 Recives node index
                 Returns index of position in parent
