@@ -40,7 +40,10 @@ namespace ltj {
         //enum state_type {s, p, o};
         //std::vector<value_type> leap_result_type;
 
+        static size_type _id;// declaration (uses 'static')
+
     private:
+        size_type m_id = 0;
         const rdf::triple_pattern *m_ptr_triple_pattern;
         index_scheme_type *m_ptr_index; //TODO: should be const
         size_type m_triple_index;
@@ -84,6 +87,8 @@ namespace ltj {
             m_pos_in_parent = o.m_pos_in_parent;
             m_key_val = o.m_key_val;
             m_order = o.m_order;
+            m_id = o.m_id;
+            m_var_order = o.m_var_order;
         }
     public:
         /*
@@ -116,12 +121,12 @@ namespace ltj {
         const std::string& var_order = m_var_order;//TODO: rename, it is a really bad name!
         const var_type& owner_var = m_owner_var;
         const size_type& triple_index = m_triple_index;
-        //const value_type &cur_s = m_cur_s;
-        //const value_type &cur_p = m_cur_p;
-        //const value_type &cur_o = m_cur_o;
+        const size_type& depth = m_depth;
+        const size_type& id = m_id;
 
         ltj_iterator() = default;
         ltj_iterator(const rdf::triple_pattern *triple, var_type var, std::string var_order, index_scheme_type *index, size_type triple_index) {
+            m_id = ltj_iterator::_id++;
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
             m_triple_index = triple_index;
@@ -319,6 +324,8 @@ namespace ltj {
                 //m_prev_pos_in_parent = o.m_prev_pos_in_parent;
                 m_key_val = o.m_key_val;
                 m_order = o.m_order;
+                m_id = o.m_id;
+                m_var_order = o.m_var_order;
             }
             return *this;
         }
@@ -343,8 +350,29 @@ namespace ltj {
             //std::swap(m_prev_pos_in_parent, o.m_prev_pos_in_parent);
             std::swap(m_key_val, o.m_key_val);
             std::swap(m_order, o.m_order);
+            std::swap(m_id, o.m_id);
+            std::swap(m_var_order, o.m_var_order);
         }
-
+        //As size_type to enable reporting an error as -1UL
+        const size_type get_var_at_depth(const size_type depth) const{
+            size_type var = -1UL;
+            if(depth <0 || depth > 2)
+                return var;
+            if(m_order[depth] == 0){
+                if(m_ptr_triple_pattern->s_is_variable()){
+                    var = m_ptr_triple_pattern->term_s.value;
+                }
+            } else if(m_order[depth] == 1){
+                if(m_ptr_triple_pattern->p_is_variable()){
+                    var = m_ptr_triple_pattern->term_p.value;
+                }
+            } else if(m_order[depth] == 2){
+                if(m_ptr_triple_pattern->o_is_variable()){
+                    var = m_ptr_triple_pattern->term_o.value;
+                }
+            }
+            return var;
+        }
         const size_type get_child_count() const{
             return m_trie->childrenCount(m_it);
         }
@@ -391,12 +419,6 @@ namespace ltj {
                 m_depth--;
                 m_it = m_parent_it;
                 m_at_end = false;
-                /*if(m_depth == -1UL){
-                    std::cout<< "here "<<std::endl;
-                }
-                if(m_it!=2 && m_depth == 0){
-                    std::cout<< "How can this be? "<<std::endl;
-                }*/
                 if(m_it==2){
                     m_at_root = true;
                     //cout<<"subi hasta la root"<<endl;
@@ -521,24 +543,10 @@ namespace ltj {
             up(x_j);
             down(x_j);
         }
-/*
-        bool inline is_bound_subject_variable(){
-            return m_ptr_triple_pattern->term_s.is_variable &&
-                m_cur_s != -1UL;
-        }
-
-        bool inline is_bound_predicate_variable(){
-            return m_ptr_triple_pattern->term_p.is_variable &&
-                m_cur_p != -1UL;
-        }
-
-        bool inline is_bound_object_variable(){
-            return m_ptr_triple_pattern->term_o.is_variable &&
-                m_cur_o != -1UL;
-        }
-*/
     };
 
+    template<class index_scheme_t, class var_t, class cons_t>
+    uint64_t ltj::ltj_iterator<index_scheme_t, var_t, cons_t>::_id = 0; // definition (does not use 'static')
 }
 
 #endif //LTJ_ITERATOR_HPP
