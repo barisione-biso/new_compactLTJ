@@ -511,7 +511,7 @@ namespace ltj {
                     ++it;
                 }
             }
-            std::cout<< "<< clear_iterators " << (int) var << " , " << triple_index << " , " << (int) iterator_owner_var << std::endl;
+            //std::cout<< "<< clear_iterators " << (int) var << " , " << triple_index << " , " << (int) iterator_owner_var << std::endl;
         }
         //Used exclusively in the adaptive algorithm.
         void clear_iterators(var_type x_j){
@@ -525,10 +525,10 @@ namespace ltj {
                 size_type t_index = triple_xj.first;//Su indice.
                 auto& triple_info = triple_xj.second;//triple_info, contiene related variables.
                 //1. Clearing all iterators in m_var_to_iterators for x_j owned by x_j.
-                std::cout << "current var:" <<std::endl;
+                //std::cout << "current var:" <<std::endl;
                 clear_iterators(x_j, t_index, x_j);
                 //2. Then, among the triples_{x_j}, check whether the iters of their related vars are owned by x_j. If so the iterator must be deleted.
-                std::cout << "related vars:" <<std::endl;
+                //std::cout << "related vars:" <<std::endl;
                 for(var_type rel_var : triple_info.related){
                     clear_iterators(rel_var, t_index, x_j);
                 }
@@ -546,7 +546,7 @@ namespace ltj {
                     }
                 }
             }
-            std::cout<< "<<clear_iterators " << (int) x_j << std::endl;
+            //std::cout<< "<<clear_iterators " << (int) x_j << std::endl;
         }
         //Used by Precalculated GAO and the adaptive variants.
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
@@ -886,13 +886,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                
+                /*
                 std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
                 std::cout << " " << std::endl;
-                
+                */
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -927,7 +927,7 @@ namespace ltj {
                 }else {
 
                     value_type c = seek(x_j, j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -946,7 +946,7 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
