@@ -500,7 +500,7 @@ namespace ltj {
         }
 
         void clear_iterators(var_type var, size_type triple_index, var_type iterator_owner_var){
-            std::cout<< ">> clear_iterators " << (int) var << " , " << triple_index << " , " << (int) iterator_owner_var << std::endl;
+            //std::cout<< ">> clear_iterators " << (int) var << " , " << triple_index << " , " << (int) iterator_owner_var << std::endl;
             if(m_gao_size.get_starting_var() == var || m_gao_size.get_starting_var() == iterator_owner_var)
                 return;
             //Por cada iterador de var.
@@ -519,11 +519,11 @@ namespace ltj {
                     ++it;
                 }
             }
-            std::cout<< "<< clear_iterators " << (int) var << " , " << triple_index << " , " << (int) iterator_owner_var << std::endl;
+            //std::cout<< "<< clear_iterators " << (int) var << " , " << triple_index << " , " << (int) iterator_owner_var << std::endl;
         }
         //Used exclusively in the adaptive algorithm.
         void clear_iterators(var_type x_j){
-            std::cout<< ">>clear_iterators " << (int) x_j << std::endl;
+            //std::cout<< ">>clear_iterators " << (int) x_j << std::endl;
             //1. Clearing all iterators in m_var_to_iterators for x_j owned by x_j.
             //m_var_to_iterators[x_j].clear();
             //2. Then, among the triples_{x_j}, check whether the iters of their related vars are owned by x_j. If so the iterator must be deleted.
@@ -554,13 +554,13 @@ namespace ltj {
                     }
                 }
             }
-            std::cout<< "<<clear_iterators " << (int) x_j << std::endl;
+            //std::cout<< "<<clear_iterators " << (int) x_j << std::endl;
         }
         //Used by Precalculated GAO.
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
         //Assign iterators to bgp_triples.
         void assign_iterators_to_bgp_triples(var_type x_j){
-            std::cout<< ">>assign_iterators_to_bgp_triples " << (int) x_j << std::endl;
+            //std::cout<< ">>assign_iterators_to_bgp_triples " << (int) x_j << std::endl;
             //Triples_{x_j}
             auto& triples_xj = get_triples_info(x_j);
             for(auto& triple_xj : triples_xj){
@@ -621,12 +621,12 @@ namespace ltj {
                     }
                 }
             }
-            std::cout<< "<<assign_iterators_to_bgp_triples " << (int) x_j << std::endl;
+            //std::cout<< "<<assign_iterators_to_bgp_triples " << (int) x_j << std::endl;
         }
         //Scenarios handled: 0 <= b <= 3, with b the number of constants.
         //Assign iterators to bgp_triples.
         void assign_iterators_to_bgp_triples_adaptive(var_type x_j){
-            std::cout<< ">>assign_iterators_to_bgp_triples_adaptive " << (int) x_j << std::endl;
+            //std::cout<< ">>assign_iterators_to_bgp_triples_adaptive " << (int) x_j << std::endl;
             //2 etapas: 1ro eliminamos iteradores invalidos y 2do asignamos iteradores a triples de x_j.
             //1.
             for(uint64_t i = 0 ; i <  m_triple_iters.size(); i++){
@@ -643,9 +643,11 @@ namespace ltj {
                                 ++triple_it;
                             }
                         }else{
-                            //Si la variable dueña del iterador no está ligada, entonces hay que eliminar el iterador del triple.
-                            triple_it = triple_iter.erase(triple_it);
+                            ++triple_it;
                         }
+                    }else{
+                        //Si la variable dueña del iterador no está ligada, entonces hay que eliminar el iterador del triple.
+                        triple_it = triple_iter.erase(triple_it);
                     }
                 }
             }
@@ -669,7 +671,7 @@ namespace ltj {
                     }
                 }
             }
-            std::cout<< "<<assign_iterators_to_bgp_triples_adaptive " << (int) x_j << std::endl;
+            //std::cout<< "<<assign_iterators_to_bgp_triples_adaptive " << (int) x_j << std::endl;
         }
         inline void add_var_to_iterator(const var_type var, ltj_iter_type* ptr_iterator){
             auto it =  m_var_to_iterators.find(var);
@@ -760,7 +762,7 @@ namespace ltj {
             return m_gao[j];
         }
         void manage_iterators(var_type new_var){
-            std::cout<< ">>manage_iterators " << (int) new_var << std::endl;
+            //std::cout<< ">>manage_iterators " << (int) new_var << std::endl;
             //1.assign iters to bgp_triples
             assign_iterators_to_bgp_triples_adaptive(new_var);
             /*2.
@@ -789,7 +791,7 @@ namespace ltj {
                 for(auto& triple_xj : triples_xj){ //por cada triple.
                     size_type t_index = triple_xj.first;//Su indice en `bgp_triple_iters`.
                     orders_to_iterators_type& triple_iter = m_triple_iters[t_index];//Los iteradores del triple[t_index].
-                    for(auto triple_it = triple_iter.begin();triple_it != triple_iter.end();){
+                    for(auto triple_it = triple_iter.begin();triple_it != triple_iter.end();triple_it++){
                         ltj_iter_type* triple_ltj_iterator = triple_it->second;
                         iters_to_add.emplace_back(triple_ltj_iterator);//los agrupo.
                     }
@@ -799,7 +801,7 @@ namespace ltj {
                     m_var_to_iterators[var].emplace_back(*it);
                 }
             }
-            std::cout<< "<<manage_iterators " << (int) new_var << std::endl;
+            //std::cout<< "<<manage_iterators " << (int) new_var << std::endl;
         }
         void erase_iterators_from_var(var_type var, std::vector<ltj_iter_type*> iterators){
             for(auto iterator : iterators){
@@ -861,13 +863,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                
+                /*
                 std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
                 std::cout << " " << std::endl;
-                
+                */
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -898,7 +900,7 @@ namespace ltj {
                 }else {
 
                     value_type c = seek(x_j, j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
 
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
@@ -917,7 +919,7 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
