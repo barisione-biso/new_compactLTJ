@@ -178,6 +178,12 @@ namespace ltj {
                 m_is_empty = true;
             }
         }
+        /*
+        ~ltj_iterator(){
+            m_ptr_triple_pattern = nullptr;
+            m_ptr_index = nullptr;
+        }
+        */
         void process_constants(){
             size_type c = -1;
             for(const auto& o : m_order){
@@ -352,6 +358,28 @@ namespace ltj {
             std::swap(m_order, o.m_order);
             std::swap(m_id, o.m_id);
             std::swap(m_var_order, o.m_var_order);
+        }
+        bool contains_var(const size_type x_j) const{
+            if(is_var_at_depth(x_j, 0)){
+                return true;
+            }
+            if(is_var_at_depth(x_j, 1)){
+                return true;
+            }
+            if(is_var_at_depth(x_j, 2)){
+                return true;
+            }
+            return false;
+        }
+        const bool is_var_at_depth(const var_type x_j, const size_type depth) const{
+            if(x_j == get_var_at_depth(depth)){
+                return true;
+            } else{
+                return false;
+            }
+        }
+        const size_type get_var_at_current_depth() const{
+            return get_var_at_depth(m_depth);
         }
         //As size_type to enable reporting an error as -1UL
         const size_type get_var_at_depth(const size_type depth) const{
