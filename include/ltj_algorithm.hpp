@@ -635,7 +635,8 @@ namespace ltj {
                     ltj_iter_type* triple_ltj_iterator = triple_it->second;
                     if(m_gao_vars[triple_ltj_iterator->owner_var]){
                         if(triple_ltj_iterator->contains_var(x_j)){//El triple contiene a `x_j`?
-                            if(triple_ltj_iterator->get_var_at_current_depth() != x_j){
+                            if(triple_ltj_iterator->get_var_at_current_depth() != x_j
+                            && m_triple_iters[i].size() > 1){//This rule should only apply when there is more than one iter in the triple, which happens when there are 3 variables in a triple.
                                 //Si x_j no está en el current depth del iterador, entonces es inválido y debe borrarse.
                                 triple_it = triple_iter.erase(triple_it);
                             }else{
@@ -658,18 +659,18 @@ namespace ltj {
                 size_type t_index = triple_xj.first;
                 //The entry in `m_triple_iters` that we will check to know whether it has iterators or not.
                 orders_to_iterators_type& triple_iter = m_triple_iters[t_index];//std::cout << "Checking triple #" << t_index << " with variable : " <<(int) x_j <<std::endl;
-                for(auto triple_it = m_triple_iters.begin(); triple_it != m_triple_iters.end();++triple_it){
-                    if(triple_iter.empty()){
-                        triple_info_type& triple_info = triple_xj.second;
-                        for(auto& order_to_iterator : triple_info.order_to_iterator){
-                            auto& order = order_to_iterator.first;
-                            //Adding x_j iterator for triple 'i' with order 'order'.
-                            size_type i = triple_xj.first;
-                            //std::cout << "Assigning iterator with order "<< order << " to triple " << t_index<< " of variable " << (int) x_j << std::endl;
-                            triple_iter[order] = get_var_iterator_by_triple_and_order(x_j, i, order);
-                        }
+                //for(auto triple_it = m_triple_iters.begin(); triple_it != m_triple_iters.end();++triple_it){
+                if(triple_iter.empty()){//Si el triple no tiene ningun iterador asignado.
+                    triple_info_type& triple_info = triple_xj.second;//Traemos los iteradores de x_j para dicho triple.
+                    for(auto& order_to_iterator : triple_info.order_to_iterator){
+                        auto& order = order_to_iterator.first;
+                        //Adding x_j iterator for triple 'i' with order 'order'.
+                        //size_type i = triple_xj.first;
+                        //std::cout << "Assigning iterator with order "<< order << " to triple " << t_index<< " of variable " << (int) x_j << std::endl;
+                        triple_iter[order] = get_var_iterator_by_triple_and_order(x_j, t_index, order);
                     }
                 }
+                //}
             }
             //std::cout<< "<<assign_iterators_to_bgp_triples_adaptive " << (int) x_j << std::endl;
         }
@@ -863,13 +864,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                /*
+                
                 std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
                 std::cout << " " << std::endl;
-                */
+                
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -898,10 +899,11 @@ namespace ltj {
                         itrs[0]->up(x_j);
                     }
                 }else {
-
                     value_type c = seek(x_j, j);
-                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
-
+                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    if(c == 2967457) {
+                        std::cout << "HMMMM ... " << std::endl;
+                    }
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
                         tuple[j] = {x_j, c};
@@ -919,7 +921,11 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        if(c == 1091130 && (int) x_j == '\003' ||
+                        c == 3889540 && (int) x_j == '\000'){
+                            std::cout << " hmm " << std::endl;
+                        }
+                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
@@ -951,6 +957,9 @@ namespace ltj {
         /*
         Called within seek() before returning 0 when leap() finds no intersection. TODO: this should be a wrapper to another func in ltj_iterator.move to ltj_iterator.        */
         void check_restart_var_level_iterator(const var_type x_j,size_type c){
+            if((int) x_j == '\000' && c == 19661068){
+                std::cout<<" HMMM " << std::endl;
+            }
             for (auto& iter : m_var_to_iterators[x_j]){
                 bool restart_iter = true;
                 //TODO: improve this linear search.
