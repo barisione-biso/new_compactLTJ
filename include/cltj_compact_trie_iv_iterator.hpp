@@ -108,6 +108,10 @@ namespace cltj{
             uint32_t getChildrenCount() const{
                 return compactTrie->childrenCount(it);
             }
+            const uint64_t subtree_size() const{
+                return compactTrie->subtree_size(it);
+            }
+
             /*
                 Moves the iterator to the next key
             */
