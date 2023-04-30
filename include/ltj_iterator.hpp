@@ -539,7 +539,7 @@ namespace ltj {
             }
             if(!m_at_root){
                 while(!m_at_end && !finished){
-                    if(results.size() >= index_scheme::util::configuration.get_number_of_results()){
+                    if(index_scheme::util::configuration.get_number_of_results() > 0 && results.size() >= index_scheme::util::configuration.get_number_of_results()){
                         finished = true;
                     }else{
                         uint32_t m_parent_child_count = m_trie->childrenCount(m_parent_it);
