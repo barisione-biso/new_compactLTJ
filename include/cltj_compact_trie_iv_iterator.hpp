@@ -111,7 +111,6 @@ namespace cltj{
             const uint64_t subtree_size() const{
                 return compactTrie->subtree_size(it);
             }
-
             /*
                 Moves the iterator to the next key
             */
