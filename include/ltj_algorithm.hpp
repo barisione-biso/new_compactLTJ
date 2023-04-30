@@ -864,13 +864,13 @@ namespace ltj {
 
             if(j == m_gao_size.number_of_variables){
                 //Report results
-                
+                /*
                 std::cout << "tuple : ";
                 for(auto& pair : tuple){
                     std::cout << int(pair.first) << " = " << pair.second << std::endl;
                 }
                 std::cout << " " << std::endl;
-                
+                */
                 res.emplace_back(tuple);
             }else{
                 //assert(m_gao_stack.size() == m_gao_vars.size());
@@ -900,10 +900,10 @@ namespace ltj {
                     }
                 }else {
                     value_type c = seek(x_j, j);
-                    std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    /*std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     if(c == 2967457) {
                         std::cout << "HMMMM ... " << std::endl;
-                    }
+                    }*/
                     while (c != 0) { //If empty c=0
                         //1. Adding result to tuple
                         tuple[j] = {x_j, c};
@@ -921,11 +921,11 @@ namespace ltj {
                         }//el down y up siempre tienen que ir porque cuando reporto necesito hacer un up despues.
                         //5. Next constant for x_j
                         c = seek(x_j, j, c + 1);//<-- AQUI DEBO preocuparme de que los iters esten en el nivel de la varible.
-                        if(c == 1091130 && (int) x_j == '\003' ||
+                        /*if(c == 1091130 && (int) x_j == '\003' ||
                         c == 3889540 && (int) x_j == '\000'){
                             std::cout << " hmm " << std::endl;
-                        }
-                        std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                        }*/
+                        //std::cout << "Seek (bucle): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
                     }
                 }
                 if(index_scheme::util::configuration.is_adaptive()){
@@ -957,9 +957,9 @@ namespace ltj {
         /*
         Called within seek() before returning 0 when leap() finds no intersection. TODO: this should be a wrapper to another func in ltj_iterator.move to ltj_iterator.        */
         void check_restart_var_level_iterator(const var_type x_j,size_type c){
-            if((int) x_j == '\000' && c == 19661068){
+            /*if((int) x_j == '\000' && c == 19661068){
                 std::cout<<" HMMM " << std::endl;
-            }
+            }*/
             for (auto& iter : m_var_to_iterators[x_j]){
                 bool restart_iter = true;
                 //TODO: improve this linear search.
