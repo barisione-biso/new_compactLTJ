@@ -772,12 +772,7 @@ namespace ltj {
             to the m_var_to_iterators map which is used by LTJ.
             */
 
-            //2.1 Limpiamos todos los iteradores de `new_var` y de sus variables relacionadas.
-            //Luego acumulamos los iteradores por triples__{new_var}, dado que `bgp_triple_iters` siempre refleja el estado actual.
-            /*m_var_to_iterators[new_var].clear();
-            for(auto rel_var : m_var_info[new_var].related){
-                m_var_to_iterators[rel_var].clear();
-            }*/
+            //2.1
             //Limpiamos todos los iteradores de cada variable.
             for(size_type i = 0 ; i < m_var_info.size(); i++){
                 auto var = m_var_info[i].name;
