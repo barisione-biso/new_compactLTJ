@@ -32,7 +32,7 @@ namespace index_scheme {
 /*Classes*/
         class configuration{
             private:
-                enum class execution_mode { cltj, adaptive_cltj, cltj_subtree };
+                enum class execution_mode { cltj, adaptive_cltj, cltj_subtree, adaptive_cltj_subtree };
                 std::unordered_map<execution_mode, std::string> mode_enum_to_str;
                 std::unordered_map<std::string, execution_mode> mode_str_to_enum;
                 execution_mode m_mode;
@@ -86,12 +86,14 @@ namespace index_scheme {
                     mode_enum_to_str = {
                                         {execution_mode::cltj, "cltj"},
                                         {execution_mode::adaptive_cltj, "adaptive_cltj"},
-                                        {execution_mode::cltj_subtree, "cltj_subtree"}
+                                        {execution_mode::cltj_subtree, "cltj_subtree"},
+                                        {execution_mode::adaptive_cltj_subtree, "adaptive_cltj_subtree"}
                                     };
                     mode_str_to_enum = {
                                         {"cltj", execution_mode::cltj},
                                         {"adaptive_cltj", execution_mode::adaptive_cltj},
-                                        {"cltj_subtree", execution_mode::cltj_subtree}
+                                        {"cltj_subtree", execution_mode::cltj_subtree},
+                                        {"adaptive_cltj_subtree", execution_mode::adaptive_cltj_subtree}
                                     };
                 };
                 inline size_type get_threshold() const{
@@ -127,7 +129,7 @@ namespace index_scheme {
                     m_verbose = verbose;
                     m_number_of_results = number_of_results;
                     m_timeout = timeout;
-                    if(m_mode == execution_mode::adaptive_cltj){
+                    if(m_mode == execution_mode::adaptive_cltj || m_mode == execution_mode::adaptive_cltj_subtree){
                         m_adaptive = true;
                     }
                     if(m_mode == execution_mode::cltj_subtree){

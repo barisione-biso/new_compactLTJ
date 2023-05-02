@@ -408,7 +408,19 @@ namespace ltj {
             if(m_number_of_constants == 0){
                 return -1UL; //Border Case, when there are no constants all the weight have to be the maximum value or the number of triples in the BGP (which is what the Ring does).
             }else{
-                return m_trie->childrenCount(m_parent_it);
+                if(index_scheme::util::configuration.uses_subtree_mode()){
+                    if(m_at_root){
+                        return 958844164;//TODO: CURRENTLY HARDCODED. It is pending store the number of triples at index creation time.
+                    }else if(m_depth == 0){
+                        return m_trie->subtree_size(m_it);
+                    }else if(m_depth == 1){
+                        return m_trie->childrenCount(m_parent_it);
+                    }else{
+                        return -1;
+                    }
+                } else{
+                    return m_trie->childrenCount(m_parent_it);
+                }
             }
         }
         void down(var_type var){// Go down in the trie
@@ -538,21 +550,21 @@ namespace ltj {
                 down(x_j);
             }
             if(!m_at_root){
-                while(!m_at_end && !finished){
-                    if(index_scheme::util::configuration.get_number_of_results() > 0 && results.size() >= index_scheme::util::configuration.get_number_of_results()){
+                while(!m_at_end){// && !finished){
+                    /*if(index_scheme::util::configuration.get_number_of_results() > 0 && results.size() >= index_scheme::util::configuration.get_number_of_results()){
                         finished = true;
-                    }else{
-                        uint32_t m_parent_child_count = m_trie->childrenCount(m_parent_it);
-                        if(m_parent_child_count == m_pos_in_parent){
-                            m_at_end = true;
-                            results.emplace_back(m_trie->key_at(m_it));//TODO: key() returns 0 when m_at_end == true. Standarize.
-                        }
-                        else{
-                            results.emplace_back(key());
-                            m_pos_in_parent++;
-                            m_it = m_trie->child(m_parent_it, m_pos_in_parent);
-                        }
+                    }else{*/
+                    uint32_t m_parent_child_count = m_trie->childrenCount(m_parent_it);
+                    if(m_parent_child_count == m_pos_in_parent){
+                        m_at_end = true;
+                        results.emplace_back(m_trie->key_at(m_it));//TODO: key() returns 0 when m_at_end == true. Standarize.
                     }
+                    else{
+                        results.emplace_back(key());
+                        m_pos_in_parent++;
+                        m_it = m_trie->child(m_parent_it, m_pos_in_parent);
+                    }
+                    //}
                 }
             }
             if(results.size()==0){
