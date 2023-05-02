@@ -32,13 +32,14 @@ namespace index_scheme {
 /*Classes*/
         class configuration{
             private:
-                enum class execution_mode { cltj, adaptive_cltj };
+                enum class execution_mode { cltj, adaptive_cltj, cltj_subtree };
                 std::unordered_map<execution_mode, std::string> mode_enum_to_str;
                 std::unordered_map<std::string, execution_mode> mode_str_to_enum;
                 execution_mode m_mode;
                 bool m_print_gao;
                 bool m_verbose;
                 bool m_adaptive;
+                bool m_subtree;
                 const size_type m_threshold;
                 size_type m_number_of_results;
                 size_type m_timeout;
@@ -84,11 +85,13 @@ namespace index_scheme {
                 m_threshold(1){
                     mode_enum_to_str = {
                                         {execution_mode::cltj, "cltj"},
-                                        {execution_mode::adaptive_cltj, "adaptive_cltj"}
+                                        {execution_mode::adaptive_cltj, "adaptive_cltj"},
+                                        {execution_mode::cltj_subtree, "cltj_subtree"}
                                     };
                     mode_str_to_enum = {
                                         {"cltj", execution_mode::cltj},
-                                        {"adaptive_cltj", execution_mode::adaptive_cltj}
+                                        {"adaptive_cltj", execution_mode::adaptive_cltj},
+                                        {"cltj_subtree", execution_mode::cltj_subtree}
                                     };
                 };
                 inline size_type get_threshold() const{
@@ -102,6 +105,9 @@ namespace index_scheme {
                 }
                 bool is_verbose() const{
                     return m_verbose;
+                }
+                bool uses_subtree_mode() const{
+                    return m_subtree;
                 }
                 size_type get_number_of_results() const{
                     return m_number_of_results;
@@ -123,6 +129,9 @@ namespace index_scheme {
                     m_timeout = timeout;
                     if(m_mode == execution_mode::adaptive_cltj){
                         m_adaptive = true;
+                    }
+                    if(m_mode == execution_mode::cltj_subtree){
+                        m_subtree = true;
                     }
                 }
                 std::string get_configuration_options() const{
