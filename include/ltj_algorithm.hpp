@@ -496,6 +496,7 @@ namespace ltj {
                     }
                 }
             }
+            //std::cout  << m_gao_size.number_of_variables <<";"<< m_gao_size.get_number_of_lonely() << std::endl;
             //std::cout << "done." << std::endl;
         }
 
@@ -895,8 +896,8 @@ namespace ltj {
                     }
                 }else {
                     value_type c = seek(x_j, j);
-                    /*std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
-                    if(c == 2967457) {
+                    //std::cout << "Seek (init): (" << (uint64_t) x_j << ": " << c << ")" <<std::endl;
+                    /*if(c == 2967457) {
                         std::cout << "HMMMM ... " << std::endl;
                     }*/
                     while (c != 0) { //If empty c=0

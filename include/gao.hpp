@@ -119,7 +119,9 @@ namespace ltj {
     public:
         const size_type &number_of_variables = m_number_of_variables;
         const size_type &number_of_triples = m_number_of_triples;
-
+        const size_type get_number_of_lonely() const{
+            return number_of_variables - m_lonely_start;
+        }
         gao_size() = default;
 
         gao_size(const std::vector<rdf::triple_pattern>* triple_patterns,
