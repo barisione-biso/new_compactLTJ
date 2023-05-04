@@ -504,8 +504,8 @@ namespace ltj {
             if(pos == f+1){
                 m_at_end = true;
                 //When we are at the end of the list, then we need to restart the pointers.
-                m_pos_in_parent = 1;
-                m_it = m_trie->child(m_parent_it, 1);
+                //m_pos_in_parent = 1;
+                //m_it = m_trie->child(m_parent_it, 1);
                 return 0;
             }
             else{
