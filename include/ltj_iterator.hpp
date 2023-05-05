@@ -130,9 +130,6 @@ namespace ltj {
             m_ptr_triple_pattern = triple;
             m_ptr_index = index;
             m_triple_index = triple_index;
-            //m_cur_s = -1UL;
-            //m_cur_p = -1UL;
-            //m_cur_o = -1UL;
             m_owner_var = var;
             m_var_order = var_order;
             m_number_of_constants = 0;
@@ -161,17 +158,10 @@ namespace ltj {
                     m_vars_order.emplace_back(m_ptr_triple_pattern->term_o);
                 }
             }
-            //m_depth++;//taken from triejoin_open()
-            //Starting down (open)
             m_at_root = false;
+            down();
             bool has_children = m_trie->childrenCount(m_it) != 0;
             if(has_children){
-                m_parent_it = m_it;
-                m_it = m_trie->child(m_it, 1);
-                m_pos_in_parent = 1;
-                m_depth++;
-                //cout<<"printing key in iterator "<< order << " (constructor): "<<m_trie->key_at(m_it)<<endl;
-
                 //Processing all the constants.
                 process_constants();
             }else{
@@ -423,10 +413,26 @@ namespace ltj {
                 }
             }
         }
-        void down(var_type var){// Go down in the trie
+        void down(){
             if(m_at_root){
                 m_at_root = false;
             }
+            if (m_depth == 2){
+                //Do nothing
+                return;
+            }else{
+                bool has_children = m_trie->childrenCount(m_it) != 0;
+                if(has_children){
+                    m_parent_it = m_it;
+                    m_it = m_trie->child(m_it, 1);
+                    //m_prev_pos_in_parent = m_pos_in_parent;
+                    m_pos_in_parent = 1;
+                    m_depth++;
+                    //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
+                }
+            }
+        }
+        void down(var_type var){// Go down in the trie
             //When there's only a triple, seek_all will always set m_at_end=true.
             //Down needs to set it at false so the next variable can be eliminated properly.
             //This was added to solve a problem of lonely variables when the BGP is composed of a single triple,
@@ -441,15 +447,7 @@ namespace ltj {
                     //Do nothing
                     return;
                 }else{
-                    bool has_children = m_trie->childrenCount(m_it) != 0;
-                    if(has_children){
-                        m_parent_it = m_it;
-                        m_it = m_trie->child(m_it, 1);
-                        //m_prev_pos_in_parent = m_pos_in_parent;
-                        m_pos_in_parent = 1;
-                        m_depth++;
-                        //cout<<"printing key in down "<<m_trie->key_at(m_it)<<endl;
-                    }
+                    down();
                 }
             }
         };
@@ -521,12 +519,7 @@ namespace ltj {
         bool in_last_level(){
             return m_depth == 2;
         }
-        /*
-            Returns true if the iterator is past the last child of a node
-        */
-        /*bool is_at_end(){
-            return at_end;
-        }*/
+        
         bool at_level_of_var(var_type x_j){
             /*if(m_vars_order.size() <= 0){
                 //First variable corner case.
@@ -550,10 +543,7 @@ namespace ltj {
                 down(x_j);
             }
             if(!m_at_root){
-                while(!m_at_end){// && !finished){
-                    /*if(index_scheme::util::configuration.get_number_of_results() > 0 && results.size() >= index_scheme::util::configuration.get_number_of_results()){
-                        finished = true;
-                    }else{*/
+                while(!m_at_end){
                     uint32_t m_parent_child_count = m_trie->childrenCount(m_parent_it);
                     if(m_parent_child_count == m_pos_in_parent){
                         m_at_end = true;
@@ -564,7 +554,6 @@ namespace ltj {
                         m_pos_in_parent++;
                         m_it = m_trie->child(m_parent_it, m_pos_in_parent);
                     }
-                    //}
                 }
             }
             if(results.size()==0){
