@@ -784,8 +784,18 @@ namespace ltj {
                     }
                 }
             }
-            //std::cout  << m_gao_size.number_of_variables <<";"<< m_gao_size.get_number_of_lonely() << std::endl;
-            //std::cout << "done." << std::endl;
+            std::cout  << "Number of vars: " << m_gao_size.number_of_variables <<" Number of Lonely: "<< m_gao_size.get_number_of_lonely() << std::endl;
+            for (uint64_t i=0 ; i < m_triple_iters.size() ; i++){
+                std::cout << "Triple # " << i;
+                for(auto& o : m_triple_iters[i]){
+                    std::cout << " order: " << o.first << " owner var : " << (int) o.second->owner_var << "."<<std::endl;
+                }
+            }
+            std::cout << " " << std::endl;
+            for(auto& it : m_var_to_iterators){
+                std::cout << "Var: " << (int) it.first << " # of iters: " << it.second.size() << std::endl;
+            }
+            std::cout << "done." << std::endl;
         }
         //! Copy constructor
         ltj_algorithm(const ltj_algorithm &o) {
