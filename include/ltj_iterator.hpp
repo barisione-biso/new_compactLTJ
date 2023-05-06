@@ -531,15 +531,12 @@ namespace ltj {
                 return false;
             }
         }
-        /**
-         * Seek_all must perform as many down() as necessary to be placed at 'var' level.
-         */
+        
         std::vector<uint64_t> seek_all(var_type x_j){
 
             std::vector<uint64_t> results;
             bool finished = false;
             if(!at_level_of_var(x_j)){
-            //while(!at_level_of_var(x_j)){
                 down(x_j);
             }
             if(!m_at_root){
